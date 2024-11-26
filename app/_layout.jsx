@@ -1,12 +1,22 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { Slot, Stack } from 'expo-router';
+import React from 'react';
+import "../global.css";
 
-const RootLayout = () => {
+const Layout = ({ children }) => {
   return (
-    <Stack>
-      <Stack.Screen name='index' options={{ headerShown: false }} />
+    <Stack spacing={4} align="center">
+      <View>
+        <Text style={{ fontSize: 24 }}>מקרא מבואר</Text>
+      </View>
+      <View>
+        {children}
+      </View>
+      <View>
+        <Text>My App Footer</Text>
+      </View>
     </Stack>
-  )
-}
+  );
+};
 
-export default RootLayout
+export default Slot;
