@@ -6,13 +6,13 @@ const CustomButton = ({title, handlePress, containerStyles, textStyles, isLoadin
     <TouchableOpacity 
     onPress={handlePress}
     activeOpacity={0.7}
-    className={`bg-stone-50 rounded-xl min-h-12 min-w-40 justify-center items-center
+    className={`bg-secondary rounded-xl min-h-12 min-w-40 justify-center items-center
     ${containerStyles} ${isLoading ? 'opacity-50' : ''}`}
     disabled={isLoading}>
       <Text 
       className={`text-primary text-2xl ${textStyles}`}
       dir="rtl">
-      התחברות
+      {title}
       </Text>
     </TouchableOpacity>
   )

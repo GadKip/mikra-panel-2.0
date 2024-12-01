@@ -3,7 +3,7 @@ import React from 'react'
 
 const UploadPage = () => {
   return (
-    <SafeAreaView className="bg-cyan-950">
+    <SafeAreaView className="bg-primary">
       <Text>העלאת קבצים</Text>
     </SafeAreaView>
   )
