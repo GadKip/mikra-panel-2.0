@@ -2,20 +2,23 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Slot, Stack } from 'expo-router';
 import React from 'react';
 import "../global.css";
+import { StatusBar } from 'expo-status-bar';
 
-const Layout = ({ children }) => {
+const Layout = () => {
   return (
-    <Stack spacing={4} align="center">
-      <View>
-        <Text style={{ fontSize: 24 }}>מקרא מבואר</Text>
-      </View>
-      <View>
-        {children}
-      </View>
-      <View>
-        <Text>My App Footer</Text>
-      </View>
-    </Stack>
+    <>
+      <Stack>
+        <Stack.Screen
+          name = "index"
+          options={{headerShown: false}}
+        />
+      <Stack.Screen
+          name = "upload"
+          options={{headerShown: true}}
+        />
+      </Stack>
+      <StatusBar backgroundColor='#161622' style="light" />
+    </>
   );
 };
 

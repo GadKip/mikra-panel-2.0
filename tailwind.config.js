@@ -6,11 +6,12 @@ module.exports = {
   theme: {
     extend: {
       colors:{
-        primary:'#3490dc',
-        secondary:'#3470dc',
+        primary:'#014782',
+        secondary:'#e5d000',
 
       }
     },
+    placeholderColor: theme => theme('colors')
   },
   plugins: [],
 }
