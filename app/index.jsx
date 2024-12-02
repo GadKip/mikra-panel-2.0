@@ -5,6 +5,7 @@ import CustomButton from '../components/CustomButton';
 import { Link, Redirect, router } from 'expo-router';
 import "../global.css";
 import images from '../constants/images';
+import FormField from '../components/FormField';
 
 export default function App() {
   return (
@@ -12,22 +13,13 @@ export default function App() {
 <SafeAreaView className="bg-primary h-full">
   <ScrollView contentContainerStyle={{ height: '100%' }}>
     <View className="w-full justify-center items-center min-h-[85vh] px-4 my-6">
-      <Text dir="rtl" className="text-4xl text-gray-50">מקרא מבואר - ניהול</Text>
-      <View className="w-full max-w-xs mb-4">
-        <Image source={images.logo}/>
-        <TextInput dir="rtl"
-        className="border-b-2 border-r-4 text-2xl text-secondary w-full"
-        placeholder="שם משתמש" />
-      </View>
-      <View className="w-full max-w-xs mb-4">
-        <TextInput dir="rtl"
-        className="mt-1 border-b-2 border-r-4 text-2xl text-secondary"
-        placeholder="סיסמה"  />
-      </View>
-      
+    <Image source={images.logo}
+          resizeMode='contain' className="flex-1 w-4 h-4 "/>
+    <Text dir="rtl" className="text-4xl text-gray-50">Mikra Panel 2.0</Text>
+      /** button config */
       <CustomButton 
-      title="התחבר"
-      handlePress={() =>router.push('/upload')}
+      title="לכניסה"
+      handlePress={() =>router.push('./auth/sign-in')}
       containerStyles="w-full mt-7"
       /> 
     </View>
