@@ -5,7 +5,6 @@ import CustomButton from '../components/CustomButton';
 import { Link, Redirect, router } from 'expo-router';
 import "../global.css";
 import images from '../constants/images';
-import FormField from '../components/FormField';
 
 export default function App() {
   return (
@@ -14,12 +13,12 @@ export default function App() {
   <ScrollView contentContainerStyle={{ height: '100%' }}>
     <View className="w-full justify-center items-center min-h-[85vh] px-4 my-6">
     <Image source={images.logo}
-          resizeMode='contain' className="flex-1 w-4 h-4 "/>
+          resizeMode="cover"
+          className="flex-1 w-4 h-4 "/>
     <Text dir="rtl" className="text-4xl text-gray-50">Mikra Panel 2.0</Text>
-      /** button config */
       <CustomButton 
       title="לכניסה"
-      handlePress={() =>router.push('./auth/sign-in')}
+      handlePress={() =>router.push('./(auth)/sign-in')}
       containerStyles="w-full mt-7"
       /> 
     </View>

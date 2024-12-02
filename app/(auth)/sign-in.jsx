@@ -18,7 +18,7 @@ const SignIn = () => {
   return (
 <SafeAreaView className="bg-primary h-full">
   <ScrollView contentContainerStyle={{ height: '100%' }}>
-    <View className="w-full justify-center items-center min-h-[85vh] px-4 my-6">
+    <View className=" justify-center items-center min-h-[85vh] px-4 my-6 flex-1">
     <Image source={images.logo}
           resizeMode='contain' className="flex-1 w-4 h-4 "/>
             <Text dir="rtl" className="text-4xl text-gray-50">התחברות</Text>
@@ -35,7 +35,6 @@ const SignIn = () => {
       otherStyles='mt-7'
       keyBoardType='password'      />
 
-      /** button config */
       <CustomButton 
       title="התחבר"
       handlePress={() =>router.push('/upload')}
