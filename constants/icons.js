@@ -27,5 +27,4 @@ import play from "../assets/icons/play.png";
   eye,
   play
 };
-console.log('Exporting icons:', icons); // Debug log
 export default icons;

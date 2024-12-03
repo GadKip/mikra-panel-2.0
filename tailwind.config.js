@@ -10,7 +10,11 @@ module.exports = {
         primary:'#014782',
         secondary:'#e5d000',
 
-      }
+      },
+      fontFamily: {
+        mainfont: ["SILEOTSR"]
+      },
+
     },
     placeholderColor: theme => theme('colors')
   },
