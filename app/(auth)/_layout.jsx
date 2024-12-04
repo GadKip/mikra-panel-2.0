@@ -9,12 +9,12 @@ const Layout = () => {
     <>
       <Stack>
         <Stack.Screen
-          name = "index"
+          name = "sign-in"
           options={{headerShown: false}}
         />
       <Stack.Screen
-          name = "upload"
-          options={{headerShown: true}}
+          name = "sign-up"
+          options={{headerShown: false}}
         />
       </Stack>
       <StatusBar backgroundColor='#161622' style="light" />
@@ -22,4 +22,4 @@ const Layout = () => {
   );
 };
 
-export default Slot;
+export default Layout;
