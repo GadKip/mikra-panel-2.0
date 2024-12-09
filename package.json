@@ -13,6 +13,7 @@
     "@expo/server": "^0.5.0",
     "@remix-run/node": "^2.15.0",
     "@remix-run/server-runtime": "^2.15.0",
+    "appwrite": "^16.0.2",
     "cookie": "^1.0.2",
     "expo": "~52.0.17",
     "expo-constants": "~17.0.3",

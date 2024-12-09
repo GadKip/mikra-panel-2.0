@@ -2,26 +2,31 @@ import { StatusBar } from 'expo-status-bar';
 import { Alert, Image, ScrollView, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context'
 import CustomButton from '../../components/CustomButton';
-import { Link, Redirect, router } from 'expo-router';
+import { Link, Redirect, router, useRouter } from 'expo-router';
 import "../../global.css";
 import images from '../../constants/images';
 import FormField from '../../components/FormField';
 import { useState } from 'react';
 import { getCurrentUser, signIn } from '../../lib/appwrite';
 import { useGlobalContext } from "../../context/GlobalProvider";
-
+import alert from "../../components/alert";
 
 
 const SignIn = () => {
-  const { setUser, setIsLoggedIn } = useGlobalContext();
+  const { setUser, setLoggedIn } = useGlobalContext();
   const [isSubmitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     email:'',
     password:''
-  })
+  });
+  const router = useRouter();
+
+  const handleChange = (name, value) => { setForm({ ...form, [name]: value, }); };
+
   const submit = async () => {
     if(!form.email || !form.password) {
-      Alert.alert('Error', 'חובה למלא את כל השדות');  
+      alert('Error', 'חובה למלא את כל השדות');
+      return; 
     }
 
     setSubmitting(true);
@@ -30,11 +35,11 @@ const SignIn = () => {
       await signIn(form.email, form.password);
       const result = await getCurrentUser();
       setUser(result);
-      setIsLoggedIn (true);
-      Alert.alert("Success","User signed in successfully!")
-      router.replace('/upload')
+      setLoggedIn (true);
+      alert("Success","User signed in successfully!")
+      router.replace('../upload')
     } catch (error) {
-      Alert.alert('Error', error.message);
+      alert('Error', error.message);
     } finally {
       setSubmitting(false);
     }

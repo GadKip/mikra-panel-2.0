@@ -12,7 +12,7 @@ import { useGlobalContext } from '../context/GlobalProvider';
 export default function App() {
   const {loading, loggedIn} = useGlobalContext();
 
-  if (!loading && loggedIn) return <Redirect href="/upload" />;
+  if (!loading && loggedIn) return <Redirect href="./upload" />;
 
   return (
 

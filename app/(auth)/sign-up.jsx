@@ -9,30 +9,32 @@ import FormField from '../../components/FormField';
 import { useState } from 'react';
 import { createUser } from '../../lib/appwrite';
 import { useGlobalContext } from "../../context/GlobalProvider";
+import alert from "../../components/alert";
+
 
 
 const SignUp = () => {
-  const { setUser, setIsLogged } = useGlobalContext();
+  const { setUser, setLoggedIn } = useGlobalContext();
   const [isSubmitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
       username:'',
       email:'',
       password:''
   })
-
+  const router = useRouter();
   const submit = async () => {
     if(!form.username || !form.email || !form.password) {
-      Alert.alert('Error', 'חובה למלא את כל השדות');
+      alert('Error', 'חובה למלא את כל השדות');
     }
     setSubmitting(true);
     try {
       const result = await createUser(form.email, form.password, form.username);
       setUser(result);
-      setIsLogged(true);
+      setLoggedIn(true);
 
-      router.replace('/upload');
+      router.replace('../upload');
     } catch (error) {
-      Alert.alert('Error', error.message);
+      alert('Error', error.message);
     } finally {
       setSubmitting(false);
     }
