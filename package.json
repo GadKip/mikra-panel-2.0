@@ -1,5 +1,5 @@
 {
-  "name": "mikra-app",
+  "name": "mikra-panel-2.0",
   "version": "1.0.0",
   "main": "expo-router/entry",
   "scripts": {
@@ -7,7 +7,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "postinstall": "npm install --legacy-peer-deps"
+    "build": "expo export",
+    "dev": "expo start"
   },
   "dependencies": {
     "@expo/metro-config": "^0.19.6",
@@ -36,10 +37,17 @@
     "react-native-url-polyfill": "^2.0.0",
     "react-native-web": "^0.19.13",
     "react-scripts": "^5.0.1",
-    "tailwindcss": "^3.4.14"
+    "tailwindcss": "^3.4.14",
+    "typescript": "^4.9.5"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
+    "@babel/core": "^7.20.0",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.1.0"
+  },
+  "resolutions": {
+    "typescript": "4.9.5"
   },
   "private": true
 }
