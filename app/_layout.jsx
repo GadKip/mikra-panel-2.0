@@ -34,7 +34,7 @@ if (!fontsLoaded && !error) return null;
         />
       <Stack.Screen
           name = "upload"
-          options={{headerShown: true}}
+          options={{headerShown: false}}
         />
       </Stack>
       <StatusBar backgroundColor='#161622' style="light" />

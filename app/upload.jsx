@@ -7,30 +7,53 @@ import CustomButton from '../components/CustomButton';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import Dropdown from '../components/Dropdown';
+import booksData from '../constants/booksData.json'; // Import the JSON data
 
+/**
+ * UploadPage Component
+ * 
+ * This component renders a page for uploading files with form fields for category, book, and episode.
+ * It handles form submission and dynamically updates the book options based on the selected category.
+ */
 const UploadPage = () => {
   const [isSubmitting, setSubmitting] = useState(false);
-  //empty  field values
-  const [form, setForm] = useState({
-    category: '',
-    book:'',
-    episode:''
-  });
+  const [form, setForm] = useState({ category: '', book: '', episode: '' });
+  const [books, setBooks] = useState([]);
   const router = useRouter();
 
-  const handleChange = (name, value) => { setForm({ ...form, [name]: value, }); };
+  /**
+   * handleChange Function
+   * 
+   * Updates the form state when a form field value changes. 
+   * Dynamically updates the book options based on the selected category.
+   * 
+   * @param {string} name - The name of the form field.
+   * @param {string} value - The new value of the form field.
+   */
+  const handleChange = (name, value) => {
+    setForm({ ...form, [name]: value });
+    if (name === 'category') {
+      setBooks(booksData.books[value]);
+    }
+  };
 
+  /**
+   * submit Function
+   * 
+   * Handles form submission. Validates the form fields and attempts to upload the data.
+   * Shows success or error alerts based on the outcome.
+   */
   const submit = async () => {
-    if(!form.category || !form.book || !form.episode) {
+    if (!form.category || !form.book || !form.episode) {
       alert('שגיאה', 'חובה למלא את כל השדות');
       return;
     }
-    
+
     setSubmitting(true);
     try {
-      await upload(form.email, form.password);
-      alert("הפרק עלה בהצלחה!")
-      router.replace('../upload')
+      await upload(form.category, form.book, form.episode);
+      alert('הקובץ עלה בהצלחה!');
+      router.replace('../upload');
     } catch (error) {
       alert('Error', error.message);
     } finally {
@@ -41,31 +64,37 @@ const UploadPage = () => {
   return (
     <SafeAreaView className="bg-primary h-full">
       <ScrollView contentContainerStyle={{ height: '100%' }}>
-        <View className=" justify-center items-center min-h-[85vh] px-4 my-6 flex-1">
-          <Image source={images.logo}
-                resizeMode='contain' className="flex-1 w-4 h-4 "/>
+        <View className="justify-center items-center min-h-[85vh] px-4 my-6 flex-1">
+          <Image source={images.logo} resizeMode="contain" className="flex-1 w-4 h-4" />
           <Text dir="rtl" className="text-4xl text-gray-50">העלאת קבצים</Text>
-          
-          <Dropdown
-            title='תורה \ נביאים \ כתובים'
-            value={form.category}
-            handleChangeText={(e) => setForm({...form, category: e})}
-            otherStyles='mt-7'
-          />
-          <Dropdown
-            title='ספר (ויקרא, שמואל...)'
-            value={form.book}
-            handleChangeText={(e) => setForm({...form, book: e})}
-            otherStyles='mt-7'
-          />
 
-          <FormField
-            title='פרשה \ פרק'
-            value={form.episode}
-            handleChangeText={(e) => setForm({...form, episode: e})}
-            otherStyles='mt-7'
+          <Dropdown
+            title="תורה \ נביאים \ כתובים"
+            value={form.category}
+            placeholder="בחר קטגוריה"
+            handleChangeText={(e) => handleChange('category', e)}
+            items={[
+              { label: 'תורה', value: 'torah' },
+              { label: 'נביאים', value: 'neviim' },
+              { label: 'כתובים', value: 'ktuvim' },
+            ]}
+            otherStyles="mt-7"
           />
-          <CustomButton 
+          <Dropdown
+            title="ספר (ויקרא, שמואל...)"
+            value={form.book}
+            placeholder="בחר ספר"
+            handleChangeText={(e) => handleChange('book', e)}
+            items={books.map((book, index) => ({ label: book, value: book }))}
+            otherStyles="mt-7"
+          />
+          <FormField
+            title="תת ספר (פרשה, פרק...)"
+            value={form.episode}
+            handleChangeText={(e) => handleChange('episode', e)}
+            otherStyles="mt-7"
+          />
+          <CustomButton
             title="העלה"
             handlePress={submit}
             containerStyles="mt-7"
@@ -73,9 +102,9 @@ const UploadPage = () => {
           />
         </View>
       </ScrollView>
-      <StatusBar backgroundColor='#161622' style='light'/>
+      <StatusBar backgroundColor="#161622" style="light" />
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default UploadPage
+export default UploadPage;
