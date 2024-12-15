@@ -7,7 +7,8 @@ import CustomButton from '../components/CustomButton';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import Dropdown from '../components/Dropdown';
-import booksData from '../constants/booksData.json'; // Import the JSON data
+import booksData from '../constants/booksData.json';
+import { upload, signOut } from '../lib/appwrite';
 
 /**
  * UploadPage Component
@@ -45,11 +46,12 @@ const UploadPage = () => {
    */
   const submit = async () => {
     if (!form.category || !form.book || !form.episode) {
-      alert('שגיאה', 'חובה למלא את כל השדות');
+      alert('Error', 'חובה למלא את כל השדות');
       return;
     }
 
     setSubmitting(true);
+    
     try {
       await upload(form.category, form.book, form.episode);
       alert('הקובץ עלה בהצלחה!');
@@ -61,9 +63,25 @@ const UploadPage = () => {
     }
   };
 
+  /**
+   * handleLogout Function
+   * 
+   * Handles user logout. Signs out the user and redirects to the login page.
+   */
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      alert('התנתקת בהצלחה!');
+      router.replace('/login');
+    } catch (error) {
+      alert('Error', error.message);
+    }
+  };
+
   return (
     <SafeAreaView className="bg-primary h-full">
       <ScrollView contentContainerStyle={{ height: '100%' }}>
+        <CustomButton title="התנתק" handlePress={handleLogout} containerStyles="mt-7 bg-red-600" />
         <View className="justify-center items-center min-h-[85vh] px-4 my-6 flex-1">
           <Image source={images.logo} resizeMode="contain" className="flex-1 w-4 h-4" />
           <Text dir="rtl" className="text-4xl text-gray-50">העלאת קבצים</Text>

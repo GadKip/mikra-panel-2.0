@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-
 import { getCurrentUser } from "../lib/appwrite";
 
 const GlobalContext = createContext();
@@ -11,8 +10,9 @@ const GlobalProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getCurrentUser()
-      .then((res) => {
+    const fetchUser = async () => {
+      try {
+        const res = await getCurrentUser();
         if (res) {
           setLoggedIn(true);
           setUser(res);
@@ -20,12 +20,16 @@ const GlobalProvider = ({ children }) => {
           setLoggedIn(false);
           setUser(null);
         }
-      })
-      .catch((error) => { console.error("Error fetching user:", error);
-      })
-      .finally(() => {
+      } catch (error) {
+        console.error("Error fetching user:", error);
+        setLoggedIn(false);
+        setUser(null);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+    
+    fetchUser();
   }, []);
 
   return (

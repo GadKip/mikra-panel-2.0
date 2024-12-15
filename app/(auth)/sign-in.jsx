@@ -39,6 +39,7 @@ const SignIn = () => {
       alert("Success","User signed in successfully!")
       router.replace('../upload')
     } catch (error) {
+      console.error('SignIn error:', error); // Log the error
       alert('Error', error.message);
     } finally {
       setSubmitting(false);
