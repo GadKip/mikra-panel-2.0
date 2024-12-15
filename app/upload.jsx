@@ -21,7 +21,7 @@ const UploadPage = () => {
   const handleChange = (name, value) => { setForm({ ...form, [name]: value, }); };
 
   const submit = async () => {
-    if(!form.book || !form.episode) {
+    if(!form.category || !form.book || !form.episode) {
       alert('שגיאה', 'חובה למלא את כל השדות');
       return;
     }
@@ -47,14 +47,22 @@ const UploadPage = () => {
           <Text dir="rtl" className="text-4xl text-gray-50">העלאת קבצים</Text>
           
           <Dropdown
-            title=''
-            value={form.username}
+            title='תורה \ נביאים \ כתובים'
+            value={form.category}
+            handleChangeText={(e) => setForm({...form, category: e})}
+            otherStyles='mt-7'
+          />
+          <Dropdown
+            title='ספר (ויקרא, שמואל...)'
+            value={form.book}
+            handleChangeText={(e) => setForm({...form, book: e})}
+            otherStyles='mt-7'
           />
 
           <FormField
-            title='פרשה\פרק'
-            value={form.username}
-            handleChangeText={(e) => setForm({...form, username: e})}
+            title='פרשה \ פרק'
+            value={form.episode}
+            handleChangeText={(e) => setForm({...form, episode: e})}
             otherStyles='mt-7'
           />
           <CustomButton 
