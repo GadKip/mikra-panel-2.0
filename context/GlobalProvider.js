@@ -1,51 +1,59 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { getCurrentUser } from "../lib/appwrite";
+import React, { createContext, useState, useEffect, useContext, useRef } from 'react';
+import { Client } from 'react-native-appwrite';
+import SessionStorage from 'react-native-session-storage';
+import { config, getCurrentUser } from '../lib/appwrite';
 
 const GlobalContext = createContext();
-export const useGlobalContext = () => useContext(GlobalContext);
 
-const GlobalProvider = ({ children }) => {
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+export const GlobalProvider = ({ children }) => {
+    const [user, setUser] = useState(null);
+    const [loggedIn, setLoggedIn] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const clientRef = useRef(null);
 
-  useEffect(() => {
+    useEffect(() => {
+      const newClient = new Client()
+          .setEndpoint(config?.endpoint)
+          .setProject(config?.projectId);
+        clientRef.current = newClient;
+    }, []);
+
     const fetchUser = async () => {
-      try {
-        const res = await getCurrentUser();
-        if (res) {
-          setLoggedIn(true);
-          setUser(res);
-        } else {
-          setLoggedIn(false);
-          setUser(null);
-        }
-      } catch (error) {
-        console.error("Error fetching user:", error);
-        setLoggedIn(false);
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
+           if(clientRef.current){
+            try {
+                const session = await SessionStorage.getItem('appwrite_session');
+                if (session) {
+                     const parsedSession = JSON.parse(session);
+                     clientRef.current.setSession(parsedSession.$id);
+                 }
+               
+                const currentUser =  await getCurrentUser(clientRef.current);
+                setUser(currentUser);
+                setLoggedIn(!!currentUser);
+              
+            } catch (error) {
+              
+               console.error("Error fetching user:", error);
+                 setUser(null);
+                setLoggedIn(false);
+            } finally {
+                setLoading(false);
+            }
+           }
     };
-    
-    fetchUser();
-  }, []);
+   
+   useEffect(() => {
+        fetchUser()
+      
+     },[clientRef.current])
 
-  return (
-    <GlobalContext.Provider
-      value={{
-        loading,
-        loggedIn,
-        setLoggedIn,
-        user,
-        setUser,
-        setLoading,
-      }}
-    >
-      {children}
-    </GlobalContext.Provider>
-  );
+    const contextValue = { user, setUser, loggedIn, setLoggedIn, loading, client: clientRef.current };
+
+    return (
+        <GlobalContext.Provider value={contextValue}>
+            {children}
+        </GlobalContext.Provider>
+    );
 };
 
-export default GlobalProvider;
+export const useGlobalContext = () => useContext(GlobalContext);

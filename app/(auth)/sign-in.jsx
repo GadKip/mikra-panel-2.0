@@ -2,7 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Alert, Image, ScrollView, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context'
 import CustomButton from '../../components/CustomButton';
-import { Link, Redirect, router, useRouter } from 'expo-router';
+import { Link, router, useRouter } from 'expo-router';
 import "../../global.css";
 import images from '../../constants/images';
 import FormField from '../../components/FormField';
@@ -13,7 +13,7 @@ import alert from "../../components/alert";
 
 
 const SignIn = () => {
-  const { setUser, setLoggedIn } = useGlobalContext();
+    const { setUser, setLoggedIn, client } = useGlobalContext();
   const [isSubmitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     email:'',
@@ -32,12 +32,12 @@ const SignIn = () => {
     setSubmitting(true);
     
     try {
-      await signIn(form.email, form.password);
-      const result = await getCurrentUser();
+        await signIn(form.email, form.password, client);
+      const result = await getCurrentUser(client);
       setUser(result);
       setLoggedIn (true);
       alert("Success","User signed in successfully!")
-      router.replace('../upload')
+      router.push('../upload')
     } catch (error) {
       console.error('SignIn error:', error); // Log the error
       alert('Error', error.message);
@@ -92,4 +92,4 @@ const SignIn = () => {
   )
 }
 
-export default SignIn
+export default SignIn;

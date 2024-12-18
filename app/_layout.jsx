@@ -1,10 +1,12 @@
-import { StyleSheet, Text, View } from 'react-native';
-import { Slot, SplashScreen, Stack } from 'expo-router';
+// app/layout.jsx
+import { View } from 'react-native';
+import { SplashScreen, Stack } from 'expo-router';
 import React, { useEffect } from 'react';
 import "../global.css";
 import { StatusBar } from 'expo-status-bar';
-import GlobalProvider from "../context/GlobalProvider";
+import {GlobalProvider} from "../context/GlobalProvider"; // Correct Import
 import {useFonts} from 'expo-font'
+
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -22,22 +24,20 @@ useEffect( () => {
 if (!fontsLoaded && !error) return null;
 
   return (
-    <GlobalProvider> 
-      <Stack>
-      <Stack.Screen
-          name = "index"
-          options={{headerShown: false}}
-        />
-        <Stack.Screen
-          name = "(auth)"
-          options={{headerShown: false}}
-        />
-      <Stack.Screen
-          name = "upload"
-          options={{headerShown: false}}
-        />
-      </Stack>
-      <StatusBar backgroundColor='#161622' style="light" />
+    <GlobalProvider>
+      <View style={{ flex: 1 }}>
+          <Stack>
+          <Stack.Screen
+              name = "index"
+              options={{headerShown: false}}
+            />
+           <Stack.Screen
+              name = "upload"
+              options={{headerShown: false}}
+            />
+          </Stack>
+          <StatusBar backgroundColor='#161622' style="light" />
+      </View>
     </GlobalProvider>
   );
 };

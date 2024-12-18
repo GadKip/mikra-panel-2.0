@@ -2,7 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Alert, Image, ScrollView, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context'
 import CustomButton from '../../components/CustomButton';
-import { Link, Redirect, router, useRouter } from 'expo-router';
+import { Link, router, useRouter } from 'expo-router';
 import "../../global.css";
 import images from '../../constants/images';
 import FormField from '../../components/FormField';
@@ -14,7 +14,7 @@ import alert from "../../components/alert";
 
 
 const SignUp = () => {
-  const { setUser, setLoggedIn } = useGlobalContext();
+  const { setUser, setLoggedIn, client } = useGlobalContext();
   const [isSubmitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
       username:'',
@@ -28,11 +28,11 @@ const SignUp = () => {
     }
     setSubmitting(true);
     try {
-      const result = await createUser(form.email, form.password, form.username);
+      const result = await createUser(form.email, form.password, form.username, client);
       setUser(result);
       setLoggedIn(true);
 
-      router.replace('../upload');
+        router.push('../upload');
     } catch (error) {
       alert('Error', error.message);
     } finally {
@@ -88,9 +88,7 @@ const SignUp = () => {
       </ScrollView>
       <StatusBar backgroundColor='#161622' style='light'/>
     </SafeAreaView>
+  );
+};
 
-
-  )
-}
-
-export default SignUp
+export default SignUp;

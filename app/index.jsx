@@ -3,19 +3,19 @@ import { Image, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomButton from '../components/CustomButton';
 import Loader from '../components/Loader';
-import { Redirect, router } from 'expo-router';
+import { Redirect, router, useRouter } from 'expo-router';
 import "../global.css";
 import images from '../constants/images';
 import 'react-native-url-polyfill/auto';
 import { useGlobalContext } from '../context/GlobalProvider';
 
 export default function App() {
-  const {loading, loggedIn} = useGlobalContext();
+    const {loading, loggedIn} = useGlobalContext();
+    const router = useRouter();
 
   if (!loading && loggedIn) return <Redirect href="./upload" />;
 
   return (
-
     <SafeAreaView className="bg-primary h-full">
       <Loader isLoading={loading} />
       <ScrollView contentContainerStyle={{ height: '100%' }}>
@@ -35,4 +35,3 @@ export default function App() {
     </SafeAreaView>
   );
 }
-

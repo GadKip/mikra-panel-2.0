@@ -11371,6 +11371,11 @@ react-native-screens@~4.1.0:
     react-freeze "^1.0.0"
     warn-once "^0.1.0"
 
+react-native-session-storage@^1.3.2:
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/react-native-session-storage/-/react-native-session-storage-1.3.2.tgz#b5cc0cfbd9fbaf81978e156fc0487e18daf0bb4a"
+  integrity sha512-/ETyxQiKWZtQA5alGMkjdIE3qbAK43eBUfLZS/5tu6KCQ/7ruaAFD7IxrUWoolPztBW2ZZetR8hsBunk9HhpJQ==
+
 react-native-url-polyfill@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/react-native-url-polyfill/-/react-native-url-polyfill-2.0.0.tgz#db714520a2985cff1d50ab2e66279b9f91ffd589"
