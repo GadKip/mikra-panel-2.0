@@ -84,7 +84,8 @@ const Upload = () => {
     if(!loggedIn && !loading) return <Redirect href='/'/>
         return (
         <SafeAreaView className='flex-1 bg-primary'>
-             <Loader isLoading={loading}/>  {/* Add Loader */}
+             <Loader isLoading={loading}/>
+             <Text style={{display:"none"}}>{/* The fix is here */}</Text>
             <ScrollView
               contentContainerStyle={{ height: '100%' }}
            >

@@ -13,6 +13,7 @@ const SignedOut = () => {
     return (
         <SafeAreaView className="bg-primary h-full">
           <Loader isLoading={loading} />
+          <Text style={{display:"none"}}>{/* The fix is here */}</Text>
           <ScrollView contentContainerStyle={{ height: '100%' }}>
             <View className="w-full justify-center items-center px-4 my-6 flex-1">
               <Image source={images.logo}

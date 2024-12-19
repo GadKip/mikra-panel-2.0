@@ -32,9 +32,8 @@ const SignIn = () => {
     setSubmitting(true);
     setLoading(true); // Set loading to true
     try {
-        await signIn(form.email, form.password, client);
-      const result = await getCurrentUser(client);
-      setUser(result);
+       const user =  await signIn(form.email, form.password, client);
+      setUser(user);
       setLoggedIn (true);
       alert("Success","User signed in successfully!")
       router.push('../upload')
@@ -50,7 +49,8 @@ const SignIn = () => {
       
   return (
   <SafeAreaView className="bg-primary h-full">
-     <Loader isLoading={loading} />
+    <Loader isLoading={loading} />
+    <Text style={{display:"none"}}>{/* The fix is here */}</Text>
     <ScrollView contentContainerStyle={{ height: '100%' }}>
       <View className=" justify-center items-center min-h-[85vh] px-4 my-6 flex-1">
       <Image source={images.logo}

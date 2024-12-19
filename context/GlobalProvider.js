@@ -10,44 +10,44 @@ export const GlobalProvider = ({ children }) => {
     const [loggedIn, setLoggedIn] = useState(false);
     const [loading, setLoading] = useState(true);
     const clientRef = useRef(null);
+  const initialized = useRef(false);
 
     useEffect(() => {
       const newClient = new Client()
           .setEndpoint(config?.endpoint)
           .setProject(config?.projectId);
         clientRef.current = newClient;
+      
     }, []);
 
-    const fetchUser = async () => {
-           if(clientRef.current){
-            try {
-                const session = await SessionStorage.getItem('appwrite_session');
-                if (session) {
-                     const parsedSession = JSON.parse(session);
-                     clientRef.current.setSession(parsedSession.$id);
-                 }
-               
-                const currentUser =  await getCurrentUser(clientRef.current);
-                setUser(currentUser);
-                setLoggedIn(!!currentUser);
-              
-            } catch (error) {
-              
-               console.error("Error fetching user:", error);
-                 setUser(null);
-                setLoggedIn(false);
-            } finally {
-                setLoading(false);
-            }
-           }
-    };
-   
-   useEffect(() => {
-        if(clientRef.current){
-          fetchUser()
+  const fetchSession = async () => {
+    if(!clientRef.current) return;
+    try {
+         setLoading(true)
+            const session = await SessionStorage.getItem('appwrite_session');
+             if (session) {
+                  const parsedSession = JSON.parse(session);
+                  clientRef.current.setSession(parsedSession.$id);
+                  const currentUser = await getCurrentUser(clientRef.current);
+                   setUser(currentUser);
+                    setLoggedIn(!!currentUser);
+             }
+        } catch (error) {
+         console.error("Error loading session from storage:", error);
+            setUser(null);
+            setLoggedIn(false)
+        } finally {
+              setLoading(false);
         }
-      
-     },[clientRef.current])
+  }
+    useEffect(() => {
+         if(clientRef.current && !initialized.current){
+          fetchSession()
+         initialized.current = true;
+         }
+
+     },[clientRef.current]);
+    
 
     const contextValue = { user, setUser, loggedIn, setLoggedIn, loading, setLoading, client: clientRef.current };
 
