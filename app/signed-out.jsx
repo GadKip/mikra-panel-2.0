@@ -1,9 +1,8 @@
-import { StatusBar } from 'expo-status-bar';
 import { Image, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomButton from '../components/CustomButton';
 import Loader from '../components/Loader';
-import { router, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import "../global.css";
 import images from '../constants/images';
 import 'react-native-url-polyfill/auto';
@@ -27,7 +26,6 @@ const SignedOut = () => {
               />
             </View>
           </ScrollView>
-          <StatusBar backgroundColor='#161622' style='light'/>
         </SafeAreaView>
       );
 

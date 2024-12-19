@@ -10,10 +10,10 @@ import { useState } from 'react';
 import { getCurrentUser, signIn } from '../../lib/appwrite';
 import { useGlobalContext } from "../../context/GlobalProvider";
 import alert from "../../components/alert";
-
+import Loader from '../../components/Loader'; // Import Loader
 
 const SignIn = () => {
-    const { setUser, setLoggedIn, client } = useGlobalContext();
+  const { setUser, setLoggedIn, client, loading, setLoading } = useGlobalContext(); // Get setLoading
   const [isSubmitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     email:'',
@@ -30,7 +30,7 @@ const SignIn = () => {
     }
 
     setSubmitting(true);
-    
+    setLoading(true); // Set loading to true
     try {
         await signIn(form.email, form.password, client);
       const result = await getCurrentUser(client);
@@ -42,6 +42,7 @@ const SignIn = () => {
       console.error('SignIn error:', error); // Log the error
       alert('Error', error.message);
     } finally {
+         setLoading(false); // Set loading to false
       setSubmitting(false);
     }
   };
@@ -49,6 +50,7 @@ const SignIn = () => {
       
   return (
   <SafeAreaView className="bg-primary h-full">
+     <Loader isLoading={loading} />
     <ScrollView contentContainerStyle={{ height: '100%' }}>
       <View className=" justify-center items-center min-h-[85vh] px-4 my-6 flex-1">
       <Image source={images.logo}
@@ -87,7 +89,6 @@ const SignIn = () => {
         </View>
       </View>
     </ScrollView>
-    <StatusBar backgroundColor='#161622' style='light'/>
   </SafeAreaView>
   )
 }

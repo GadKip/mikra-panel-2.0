@@ -43,11 +43,13 @@ export const GlobalProvider = ({ children }) => {
     };
    
    useEffect(() => {
-        fetchUser()
+        if(clientRef.current){
+          fetchUser()
+        }
       
      },[clientRef.current])
 
-    const contextValue = { user, setUser, loggedIn, setLoggedIn, loading, client: clientRef.current };
+    const contextValue = { user, setUser, loggedIn, setLoggedIn, loading, setLoading, client: clientRef.current };
 
     return (
         <GlobalContext.Provider value={contextValue}>

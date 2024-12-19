@@ -1,4 +1,3 @@
-import { StatusBar } from 'expo-status-bar';
 import { Image, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomButton from '../components/CustomButton';
@@ -18,6 +17,7 @@ export default function App() {
   return (
     <SafeAreaView className="bg-primary h-full">
       <Loader isLoading={loading} />
+        <Text style={{display:"none"}}>{/* The fix is here */}</Text>
       <ScrollView contentContainerStyle={{ height: '100%' }}>
         <View className="w-full justify-center items-center px-4 my-6 flex-1">
           <Image source={images.logo}
@@ -31,7 +31,6 @@ export default function App() {
           />
         </View>
       </ScrollView>
-      <StatusBar backgroundColor='#161622' style='light'/>
     </SafeAreaView>
   );
 }
