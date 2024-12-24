@@ -2,7 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Alert, Image, ScrollView, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context'
 import CustomButton from '../../components/CustomButton';
-import { Link, router, useRouter } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import "../../global.css";
 import images from '../../constants/images';
 import FormField from '../../components/FormField';
@@ -36,7 +36,7 @@ const SignIn = () => {
       setUser(user);
       setLoggedIn (true);
       alert("Success","User signed in successfully!")
-      router.push('../upload')
+      router.replace('/upload');
     } catch (error) {
       console.error('SignIn error:', error); // Log the error
       alert('Error', error.message);

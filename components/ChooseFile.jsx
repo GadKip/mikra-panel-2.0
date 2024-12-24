@@ -17,12 +17,12 @@ catch(err){
 
 
 /**
- * Browse Component
+ * ChooseFile Component
  *
  * A button component for browsing and selecting files from the device.
  * It renders a "Browse Files" button that triggers a document picker and calls a provided callback with selected file
  */
-const Browse = ({ onFileSelected }) => {
+const ChooseFile = ({ onFileSelected }) => {
   const isWeb = typeof navigator !== 'undefined' && navigator.product !== 'ReactNative'
   const [selectedFileName, setSelectedFileName] = useState('');
    const inputRef = useRef(null);
@@ -119,4 +119,4 @@ const styles = StyleSheet.create({
 
     }
 });
-export default Browse;
+export default ChooseFile;

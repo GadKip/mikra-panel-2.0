@@ -22,7 +22,7 @@ const SignedOut = () => {
               <Text className="flex-col justify-center text-4xl text-gray-50 mt-7">התנתקת מהחשבון</Text>
               <CustomButton 
               title="להתחברות"
-              handlePress={() => router.push('/index')}
+              handlePress={() => router.replace('/index')}
               containerStyles="font-mainfont flex-col mt-7 mb-40 justify-center"
               />
             </View>
@@ -32,5 +32,4 @@ const SignedOut = () => {
 
 }
 
-export default SignedOut
-
+export default SignedOut;

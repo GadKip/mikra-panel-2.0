@@ -32,7 +32,7 @@ const SignUp = () => {
             const result = await createUser(form.email, form.password, form.username, client);
             setUser(result);
             setLoggedIn(true);
-            router.push('../upload');
+            router.push('/upload', { replace: true });
         } catch (error) {
             alert('Error', error.message);
         } finally {
