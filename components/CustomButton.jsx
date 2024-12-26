@@ -11,9 +11,9 @@ const CustomButton = ({title, handlePress, containerStyles, textStyles, isLoadin
       style={{ pointerEvents: isLoading ? 'none' : 'auto' }}  
     >
       <Text 
-      className={`text-primary text-2xl ${textStyles}`}
-      dir="rtl">
-      {title}
+        className={`text-primary text-2xl ${textStyles}`}
+        dir="rtl">
+        {title}
       </Text>
     </TouchableOpacity>
   )

@@ -35,7 +35,6 @@ const SignIn = () => {
        const user =  await signIn(form.email, form.password, client);
       setUser(user);
       setLoggedIn (true);
-      alert("Success","User signed in successfully!")
       router.replace('/upload');
     } catch (error) {
       console.error('SignIn error:', error); // Log the error

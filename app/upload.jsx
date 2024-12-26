@@ -159,7 +159,7 @@ const Upload = () => {
                 <CustomButton
                     title='רשימת קבצים'
                     containerStyles='mt-5'
-                    handlePress={() => router.push('/browse')}
+                    handlePress={() => router.replace('/browse')}
                 />
             </View>
         </SafeAreaView>
