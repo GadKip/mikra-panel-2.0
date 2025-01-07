@@ -23,22 +23,30 @@ export const GlobalProvider = ({ children }) => {
   const fetchSession = async () => {
     if(!clientRef.current) return;
     try {
-         setLoading(true)
-            const session = await SessionStorage.getItem('appwrite_session');
-             if (session) {
-                  const parsedSession = JSON.parse(session);
-                  clientRef.current.setSession(parsedSession.$id);
-                  const currentUser = await getCurrentUser(clientRef.current);
-                   setUser(currentUser);
-                    setLoggedIn(!!currentUser);
-             }
-        } catch (error) {
-         console.error("Error loading session from storage:", error);
-            setUser(null);
-            setLoggedIn(false)
-        } finally {
-              setLoading(false);
+        setLoading(true);
+        const session = localStorage.getItem('appwrite_session');
+        if (session) {
+            const parsedSession = JSON.parse(session);
+            // Check if session is expired
+            if (new Date(parsedSession.expire) > new Date()) {
+                clientRef.current.setSession(parsedSession.$id);
+                const currentUser = await getCurrentUser(clientRef.current);
+                setUser(currentUser);
+                setLoggedIn(!!currentUser);
+            } else {
+                // Session expired, clear it
+                localStorage.removeItem('appwrite_session');
+                setUser(null);
+                setLoggedIn(false);
+            }
         }
+    } catch (error) {
+        console.error("Error loading session from storage:", error);
+        setUser(null);
+        setLoggedIn(false);
+    } finally {
+        setLoading(false);
+    }
   }
     useEffect(() => {
          if(clientRef.current && !initialized.current){

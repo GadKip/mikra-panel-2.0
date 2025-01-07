@@ -1,5 +1,5 @@
-import { Text, View, SafeAreaView, TouchableOpacity, Alert } from 'react-native';
-import React, { useState, useCallback, useEffect, useContext } from 'react';
+import { Text, View, SafeAreaView, TouchableOpacity } from 'react-native';
+import React, { useState, useCallback, useEffect } from 'react';
 import CustomButton from '../components/CustomButton';
 import FormField from '../components/FormField';
 import { useGlobalContext } from '../context/GlobalProvider';
@@ -9,45 +9,48 @@ import Dropdown from '../components/Dropdown';
 import booksData from '../constants/booksData.json';
 import ChooseFile from '../components/ChooseFile';
 import { useHandleUploadFileError, useCustomAlert } from '../lib/utils';
-import Loader from '../components/Loader'; // Import Loader
+import Loader from '../components/Loader';
+import { useResponsive } from '../hooks/useResponsive';
+import Header from '../components/Header';
+import { useLoadingState } from '../hooks/useLoadingState';
 
 const Upload = () => {
-    const { user, setUser, loggedIn, loading, client, setLoading } = useGlobalContext(); // Get setLoading function
-    const [isSubmitting, setSubmitting] = useState(false);
+    const { user, setUser, loggedIn, client } = useGlobalContext();
+    const { withLoading, isLoading } = useLoadingState();
     const [form, setForm] = useState({ category: '', book: '', episode: '' });
     const [books, setBooks] = useState([]);
     const [selectedFile, setSelectedFile] = useState(null);
     const router = useRouter();
+    const showAlert = useCustomAlert();
+    const handleUploadFileError = useHandleUploadFileError();
+    const { getResponsiveValue } = useResponsive();
 
     useEffect(() => {
-        if (!user && client) {  // Add client check
-            getUserSession(client).then(sessionUser => {  // Pass client to getUserSession
+        if (!user && client) {
+            getUserSession(client).then(sessionUser => {
                 if (!sessionUser) {
                     router.replace('/sign-in');
                 } else {
                     setUser(sessionUser);
                 }
             }).catch((error) => {
-                alert('Error', 'Could not log in user, try again.');
+                showAlert('Error', 'Could not log in user, try again.');
                 router.replace('/sign-in');
             });
         }
-    }, [user, setUser, client]); // Add client to dependencies;
+    }, [user, setUser, client]);
 
     const handleLogout = async () => {
         try {
             if (client) {
-                setLoading(true);
                 await signOut(client);
-                alert('התנתקת בהצלחה!');
+                showAlert('התנתקת בהצלחה!');
                 router.replace('/');
             } else {
                 throw new Error('No valid client to handle signOut.');
             }
         } catch (error) {
-            alert('Error', error.message);
-        } finally {
-            setLoading(false);
+            showAlert('Error', error.message);
         }
     };
 
@@ -65,55 +68,58 @@ const Upload = () => {
             setBooks(booksData.books[value]);
         }
     };
-    const showAlert = useCustomAlert();
-    const handleUploadFileError = useHandleUploadFileError();
 
     const submit = async () => {
-        if (!form.category || !form.book || !form.episode || !selectedFile) { // Check all required fields
+        if (!form.category || !form.book || !form.episode || !selectedFile) {
             showAlert('Error', 'חובה למלא את כל השדות, כולל בחירת קובץ');
             return;
         }
-        setSubmitting(true);
-        setLoading(true);
-        try {
-            if (!selectedFile) { // Changed from file to selectedFile
-                showAlert("Error", "Please select a file.");
-                return;
+
+        await withLoading(async () => {
+            try {
+                if (!selectedFile) {
+                    showAlert("Error", "Please select a file.");
+                    return;
+                }
+                const fileBlob = await fetch(selectedFile.uri).then(r => r.blob());
+                const updatedFile = { ...selectedFile, fileBlob };
+                
+                if (client && user) {
+                    await upload(
+                        form.category,
+                        form.book,
+                        form.episode,
+                        updatedFile,
+                        client,
+                        user.$id
+                    );
+                    showAlert("Success", "File upload successful!");
+                    
+                    // Reset form
+                    setForm({ category: '', book: '', episode: '' });
+                    setSelectedFile(null);
+                    setBooks([]);
+                } else {
+                    throw new Error('No valid client to handle upload.');
+                }
+            } catch (error) {
+                handleUploadFileError(error);
             }
-            const fileBlob = await fetch(selectedFile.uri).then(r => r.blob());
-            const updatedFile = { ...selectedFile, fileBlob }; // Changed from file to selectedFile
-            
-            if (client && user) {
-                await upload(
-                    form.category,
-                    form.book,
-                    form.episode,
-                    updatedFile,
-                    client,
-                    user.$id
-                );
-                showAlert("Success", "File upload successful!");
-                router.replace('/upload');
-            } else {
-                throw new Error('No valid client to handle upload.');
-            }
-        } catch (error) {
-            handleUploadFileError(error);
-        } finally {
-            setSubmitting(false);
-            setLoading(false);
-        }
+        }, true);
     };
 
-            
-    if (loading) return null;
-    if (!loggedIn && !loading) return <Redirect href='/' />;
+    if (isLoading) return null;
+    if (!loggedIn && !isLoading) return <Redirect href='/' />;
+
     return (
         <SafeAreaView className='flex-1 bg-primary'>
-            <Loader isLoading={loading} />
-            <Text style={{ display: "none" }}>{/* The fix is here */}</Text>
-            <CustomButton title="התנתק" handlePress={handleLogout} containerStyles="mt-7 bg-red-600" />
-            <View className='w-full flex-1 items-center justify-center px-4 my-6'>
+            <Loader isLoading={isLoading} />
+            <Header currentPage="upload" />
+            <View className={getResponsiveValue({
+                mobile: 'w-full flex-1 items-center justify-center px-4 my-6',
+                tablet: 'w-4/5 flex-1 items-center justify-center mx-auto my-8',
+                desktop: 'w-3/5 flex-1 items-center justify-center mx-auto my-10'
+            })}>
                 <Text className="text-center text-3xl text-gray-50">העלאת פרקים</Text>
                 <Dropdown
                     title="תורה \ נביאים \ כתובים"
@@ -132,7 +138,7 @@ const Upload = () => {
                     value={form.book}
                     placeholder="בחר ספר"
                     handleChangeText={(e) => handleChange('book', e)}
-                    items={books.map((book, index) => ({ label: book, value: book }))}
+                    items={books.map((book) => ({ label: book, value: book }))}
                     otherStyles="mt-7"
                 />
                 <FormField
@@ -143,7 +149,9 @@ const Upload = () => {
                 />
                 {selectedFile && (
                     <View style={{ flexDirection: "row", alignItems: 'center', margin: 10, backgroundColor: '#24252f', padding: 8, borderRadius: 6, width: 280 }}>
-                        <Text numberOfLines={1} ellipsizeMode='middle' style={{ fontSize: 16, fontWeight: "bold", color: '#f0f0f0', flex: 1 }}>File Selected:{selectedFile.name}</Text>
+                        <Text numberOfLines={1} ellipsizeMode='middle' style={{ fontSize: 16, fontWeight: "bold", color: '#f0f0f0', flex: 1 }}>
+                            File Selected: {selectedFile.name}
+                        </Text>
                         <TouchableOpacity onPress={handleClearFile}>
                             <Text style={{ fontSize: 12, color: 'white', backgroundColor: '#ff2442', borderRadius: 20, width: 25, height: 25, lineHeight: 20, textAlign: 'center' }}>X</Text>
                         </TouchableOpacity>
@@ -154,12 +162,7 @@ const Upload = () => {
                     title='העלה'
                     containerStyles='mt-8'
                     handlePress={submit}
-                    isLoading={isSubmitting}
-                />
-                <CustomButton
-                    title='רשימת קבצים'
-                    containerStyles='mt-5'
-                    handlePress={() => router.replace('/browse')}
+                    isLoading={isLoading}
                 />
             </View>
         </SafeAreaView>

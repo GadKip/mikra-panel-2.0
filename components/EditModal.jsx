@@ -2,18 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Modal, TouchableOpacity } from 'react-native';
 import FormField from './FormField';
 import Dropdown from './Dropdown';
-import ChooseFile from './ChooseFile';
 import CustomButton from './CustomButton';
 import booksData from '../constants/booksData.json';
+import { useResponsive } from '../hooks/useResponsive';
 
 const EditModal = ({ isVisible, onClose, onSubmit, initialData }) => {
+    const { getResponsiveValue } = useResponsive();
     const [form, setForm] = useState({
         category: '',
         book: '',
         episode: ''
     });
     const [books, setBooks] = useState([]);
-    const [selectedFile, setSelectedFile] = useState(null);
 
     useEffect(() => {
         if (initialData) {
@@ -36,7 +36,7 @@ const EditModal = ({ isVisible, onClose, onSubmit, initialData }) => {
     };
 
     const handleSubmit = () => {
-        onSubmit({ ...form, file: selectedFile });
+        onSubmit(form);
         onClose();
     };
 
@@ -45,10 +45,20 @@ const EditModal = ({ isVisible, onClose, onSubmit, initialData }) => {
             visible={isVisible}
             transparent={true}
             animationType="slide"
+            onRequestClose={onClose}
         >
             <View className="flex-1 justify-center items-center bg-black/50">
-                <View className="bg-primary w-[90%] rounded-lg p-4">
-                    <Text className="text-text text-2xl text-center mb-4">עריכת פרק</Text>
+                <View className={getResponsiveValue({
+                    mobile: "w-[90%] bg-white rounded-lg p-4",
+                    tablet: "w-[70%] bg-white rounded-lg p-6",
+                    desktop: "w-[50%] bg-white rounded-lg p-8"
+                })}>
+                    <View className="flex-row justify-between items-center mb-6">
+                        <Text className="text-2xl">עריכת פרק</Text>
+                        <TouchableOpacity onPress={onClose}>
+                            <Text className="text-xl">✕</Text>
+                        </TouchableOpacity>
+                    </View>
                     
                     <Dropdown
                         title="תורה \ נביאים \ כתובים"
@@ -62,7 +72,6 @@ const EditModal = ({ isVisible, onClose, onSubmit, initialData }) => {
                         ]}
                         otherStyles="mb-4"
                     />
-                    
                     <Dropdown
                         title="ספר"
                         value={form.book}
@@ -71,22 +80,14 @@ const EditModal = ({ isVisible, onClose, onSubmit, initialData }) => {
                         items={books.map((book) => ({ label: book, value: book }))}
                         otherStyles="mb-4"
                     />
-                    
                     <FormField
                         title="תת ספר"
                         value={form.episode}
                         handleChangeText={(e) => handleChange('episode', e)}
-                        otherStyles="mb-4"
+                        otherStyles="mb-6"
                     />
                     
-                    <ChooseFile onFileSelected={setSelectedFile} />
-                    {!selectedFile && (
-                        <Text className="text-text text-sm text-center mt-2">
-                            השאר ריק כדי להשאיר את הקובץ הנוכחי
-                        </Text>
-                    )}
-                    
-                    <View className="flex-row justify-end gap-2 mt-4">
+                    <View className="flex-row justify-end space-x-4">
                         <CustomButton
                             title="ביטול"
                             handlePress={onClose}
@@ -95,7 +96,7 @@ const EditModal = ({ isVisible, onClose, onSubmit, initialData }) => {
                         <CustomButton
                             title="שמור"
                             handlePress={handleSubmit}
-                            containerStyles="bg-green-600"
+                            containerStyles="bg-primary"
                         />
                     </View>
                 </View>
