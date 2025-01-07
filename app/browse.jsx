@@ -3,10 +3,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
 import { useGlobalContext } from '../context/GlobalProvider';
-import { listFiles, deleteFile } from '../lib/appwrite';
+import { listFiles, deleteFile, updateFile } from '../lib/appwrite';
 import CustomButton from '../components/CustomButton';
 import Loader from '../components/Loader';
 import { useCustomAlert } from '../lib/utils';
+import EditModal from '../components/EditModal';
 
 const Browse = () => {
     const [books, setBooks] = useState({});
@@ -14,6 +15,7 @@ const Browse = () => {
     const { client } = useGlobalContext();
     const customAlert = useCustomAlert();
     const router = useRouter();
+    const [editingEpisode, setEditingEpisode] = useState(null);
   
     useEffect(() => {
       fetchBooks();
@@ -64,6 +66,26 @@ const Browse = () => {
       );
     };
   
+    const handleEdit = async (formData) => {
+        try {
+            setLoading(true);
+            await updateFile(
+                editingEpisode.$id,
+                editingEpisode.fileId,
+                formData,
+                client
+            );
+            await fetchBooks();
+            customAlert('הצלחה', 'הפרק עודכן בהצלחה');
+        } catch (error) {
+            console.error("Error updating file:", error);
+            customAlert('שגיאה', 'לא ניתן לעדכן את הפרק. נסה שוב מאוחר יותר.');
+        } finally {
+            setLoading(false);
+            setEditingEpisode(null);
+        }
+    };
+  
     return (
       <SafeAreaView className="flex-1 bg-primary">
         <Loader isLoading={loading} />
@@ -93,6 +115,12 @@ const Browse = () => {
                         >
                           <Text className="text-white">מחק</Text>
                         </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => setEditingEpisode(episode)}
+                          className="bg-blue-600 px-3 py-1 rounded"
+                        >
+                          <Text className="text-white">ערוך</Text>
+                        </TouchableOpacity>
                       </View>
                       <Text className="text-text text-lg">
                         {episode.episode}
@@ -104,6 +132,12 @@ const Browse = () => {
             </View>
           ))}
         </ScrollView>
+        <EditModal
+            isVisible={!!editingEpisode}
+            onClose={() => setEditingEpisode(null)}
+            onSubmit={handleEdit}
+            initialData={editingEpisode}
+        />
       </SafeAreaView>
     );
   
