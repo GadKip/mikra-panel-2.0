@@ -12,6 +12,7 @@ const Browse = () => {
     const [books, setBooks] = useState({});
     const [loading, setLoading] = useState(true);
     const { client } = useGlobalContext();
+    const customAlert = useCustomAlert();
     const router = useRouter();
   
     useEffect(() => {
@@ -29,7 +30,7 @@ const Browse = () => {
         setBooks(files);
       } catch (error) {
         console.error("Error fetching books:", error);
-        alert('Error', 'Could not fetch books. Please try again later.');
+        customAlert('Error', 'Could not fetch books. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -39,36 +40,71 @@ const Browse = () => {
       router.push(`/books/${bookId}`);
     };
   
+    const handleDelete = async (episode) => {
+      customAlert(
+        'אישור מחיקה',
+        'האם אתה בטוח שברצונך למחוק פרק זה?',
+        async () => {
+          try {
+            setLoading(true);
+            await deleteFile(episode.fileId, episode.$id, client);
+            await fetchBooks();
+            customAlert('הצלחה', 'הפרק נמחק בהצלחה');
+          } catch (error) {
+            console.error("Error deleting file:", error);
+            customAlert('שגיאה', 'לא ניתן למחוק את הפרק. נסה שוב מאוחר יותר.');
+          } finally {
+            setLoading(false);
+          }
+        },
+        null,
+        'מחק',
+        'ביטול',
+        true
+      );
+    };
+  
     return (
-      <View className="flex-1 bg-background">
+      <SafeAreaView className="flex-1 bg-primary">
         <Loader isLoading={loading} />
-        <ScrollView className="flex-1 p-4">
+        <View className="flex-row justify-between items-center px-4 py-3 bg-secondary">
+          <CustomButton
+            title="חזרה להעלאה"
+            handlePress={() => router.replace('/upload')}
+            containerStyles="bg-primary px-4"
+          />
+          <Text className="text-text text-2xl">רשימת פרקים</Text>
+        </View>
+        <ScrollView className="flex-1 px-4 py-2">
           {Object.entries(books).map(([category, categoryBooks]) => (
-            <View key={category} className="mb-8">
-              <Text className="text-text text-2xl text-right mb-4">{category}</Text>
+            <View key={category} className="mb-8 bg-secondary rounded-lg p-4">
+              <Text className="text-text text-2xl text-right mb-4 border-b border-primary pb-2">{category}</Text>
               {Object.entries(categoryBooks).map(([bookName, episodes]) => (
                 <View key={bookName} className="mb-4">
-                  <Text 
-                    className="text-text text-xl text-right mb-2"
-                    onPress={() => handleBookPress(bookName)}
-                  >
+                  <Text className="text-text text-xl text-right mb-2 text-secondary-content">
                     {bookName}
                   </Text>
                   {episodes.map((episode) => (
-                    <Text 
-                      key={episode.$id} 
-                      className="text-text text-lg text-right py-2"
-                      onPress={() => handleBookPress(episode.$id)}
-                    >
-                      {episode.episode}
-                    </Text>
+                    <View key={episode.$id} className="flex-row justify-between items-center bg-primary rounded-lg mb-2 p-3">
+                      <View className="flex-row gap-2">
+                        <TouchableOpacity
+                          onPress={() => handleDelete(episode)}
+                          className="bg-red-600 px-3 py-1 rounded"
+                        >
+                          <Text className="text-white">מחק</Text>
+                        </TouchableOpacity>
+                      </View>
+                      <Text className="text-text text-lg">
+                        {episode.episode}
+                      </Text>
+                    </View>
                   ))}
                 </View>
               ))}
             </View>
           ))}
         </ScrollView>
-      </View>
+      </SafeAreaView>
     );
   
 };

@@ -60,13 +60,21 @@ const SignIn = () => {
         value={form.email}
         handleChangeText={(e) => setForm({...form, email: e})}
         otherStyles='mt-7'
-        keyBoardType='email-address'      />
+        keyBoardType='email-address'
+        onSubmitEditing={() => {
+          if (form.email && form.password) submit();
+        }}
+      />
       <FormField
         title='סיסמה'
         value={form.password}
         handleChangeText={(e) => setForm({...form, password: e})}
         otherStyles='mt-7'
-        keyBoardType='password'      />
+        keyBoardType='password'
+        onSubmitEditing={() => {
+          if (form.email && form.password) submit();
+        }}
+      />
 
         <CustomButton 
         title="התחבר"
