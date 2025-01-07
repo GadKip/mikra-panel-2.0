@@ -11,6 +11,7 @@ import { useCustomAlert } from '../lib/utils';
 const Browse = () => {
     const [books, setBooks] = useState({});
     const [loading, setLoading] = useState(true);
+    const { client } = useGlobalContext();
     const router = useRouter();
   
     useEffect(() => {
@@ -18,8 +19,12 @@ const Browse = () => {
     }, []);
   
     const fetchBooks = async () => {
+      if (!client) {
+        console.error("No client available");
+        return;
+      }
       try {
-        setLoading(true); // Set loading before fetch
+        setLoading(true);
         const files = await listFiles(client);
         setBooks(files);
       } catch (error) {
