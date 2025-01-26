@@ -19,7 +19,7 @@ const SignedOut = () => {
               <Text className="flex-col justify-center text-4xl text-gray-50 mt-7">התנתקת מהחשבון</Text>
               <CustomButton 
                 title="להתחברות"
-                handlePress={() => router.replace('/index')}
+                handlePress={() => router.replace('/sign-in')}
                 containerStyles="font-mainfont flex-col mt-7 mb-40 justify-center"
               />
             </View>

@@ -9,9 +9,9 @@ export default function Header({ currentPage }) {
 
     return (
         <View className={getResponsiveValue({
-            mobile: "flex-row justify-between items-center px-4 py-3 bg-secondary",
-            tablet: "flex-row justify-between items-center px-6 py-4 bg-secondary",
-            desktop: "flex-row justify-between items-center px-8 py-4 bg-secondary"
+            mobile: "flex-row justify-between items-center px-4 py-3 bg-gray-700",
+            tablet: "flex-row justify-between items-center px-6 py-4 bg-gray-700",
+            desktop: "flex-row justify-between items-center px-8 py-4 bg-gray-700"
         })}>
             <View className="flex-row space-x-4">
                 <CustomButton
