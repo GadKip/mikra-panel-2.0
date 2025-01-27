@@ -11,7 +11,8 @@ const EditModal = ({ isVisible, onClose, onSubmit, initialData }) => {
     const [form, setForm] = useState({
         category: '',
         book: '',
-        episode: ''
+        episode: '',
+        episodeOrder: '' // Add episode order field
     });
     const [books, setBooks] = useState([]);
 
@@ -20,10 +21,13 @@ const EditModal = ({ isVisible, onClose, onSubmit, initialData }) => {
             setForm({
                 category: initialData.category || '',
                 book: initialData.book || '',
-                episode: initialData.episode || ''
+                episode: initialData.episode || '',
+                episodeOrder: initialData.episodeOrder?.toString() || '' // Add episode order
             });
             if (initialData.category) {
-                setBooks(booksData.books[initialData.category] || []);
+                // Get just the array of books for the selected category
+                const categoryBooks = booksData.books[initialData.category] || [];
+                setBooks(categoryBooks);
             }
         }
     }, [initialData]);
@@ -31,7 +35,9 @@ const EditModal = ({ isVisible, onClose, onSubmit, initialData }) => {
     const handleChange = (name, value) => {
         setForm({ ...form, [name]: value });
         if (name === 'category') {
-            setBooks(booksData.books[value] || []);
+            // Get just the array of books for the selected category
+            const categoryBooks = booksData.books[value] || [];
+            setBooks(categoryBooks);
         }
     };
 
@@ -77,13 +83,24 @@ const EditModal = ({ isVisible, onClose, onSubmit, initialData }) => {
                         value={form.book}
                         placeholder="בחר ספר"
                         handleChangeText={(e) => handleChange('book', e)}
-                        items={books.map((book) => ({ label: book, value: book }))}
+                        items={books.map(book => ({
+                            label: book.name,  // Use book.name for both label and value
+                            value: book.name
+                        }))}
                         otherStyles="mb-4"
                     />
                     <FormField
                         title="תת ספר"
                         value={form.episode}
                         handleChangeText={(e) => handleChange('episode', e)}
+                        otherStyles="mb-4"
+                    />
+                    <FormField
+                        title="סדר פרק"
+                        value={form.episodeOrder}
+                        handleChangeText={(e) => handleChange('episodeOrder', e)}
+                        keyboardType="numeric"
+                        placeholder="הזן מספר לסידור (אופציונלי)"
                         otherStyles="mb-6"
                     />
                     

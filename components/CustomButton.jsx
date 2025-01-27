@@ -4,9 +4,13 @@ import React, { useState } from 'react'
 const CustomButton = ({title, handlePress, containerStyles, textStyles, isLoading}) => {
   const [isHovered, setIsHovered] = useState(false);
 
+  const onPress = () => {
+    handlePress?.();
+  };
+
   return (
     <TouchableOpacity 
-      onPress={handlePress}
+      onPress={onPress}
       activeOpacity={0.7}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

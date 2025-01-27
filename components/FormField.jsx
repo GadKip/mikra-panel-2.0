@@ -6,7 +6,7 @@ const FormField = ({
     value, 
     handleChangeText, 
     otherStyles, 
-    keyBoardType,
+    keyBoardType = 'default',
     onSubmitEditing,
     placeholder 
 }) => {
@@ -28,7 +28,7 @@ const FormField = ({
                     className={`flex-1 text-white text-lg h-full ${isLTRField ? 'text-left' : 'text-right'}`}
                     placeholderTextColor="#666"
                     secureTextEntry={keyBoardType === 'password'}
-                    keyboardType={keyBoardType === 'email-address' ? 'email-address' : 'default'}
+                    keyboardType={keyBoardType}
                     returnKeyType="done"
                     onSubmitEditing={onSubmitEditing}
                     textAlign={isLTRField ? 'left' : 'right'}

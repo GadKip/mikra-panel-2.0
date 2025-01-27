@@ -65,7 +65,7 @@ const Upload = () => {
     const handleChange = (name, value) => {
         setForm({ ...form, [name]: value });
         if (name === 'category') {
-            setBooks(booksData.books[value]);
+            setBooks(booksData.books[value] || []);
         }
     };
 
@@ -138,7 +138,10 @@ const Upload = () => {
                     value={form.book}
                     placeholder="בחר ספר"
                     handleChangeText={(e) => handleChange('book', e)}
-                    items={books.map((book) => ({ label: book, value: book }))}
+                    items={books.map((book) => ({ 
+                        label: book.name, 
+                        value: book.name 
+                    }))}
                     otherStyles="mt-7"
                 />
                 <FormField
