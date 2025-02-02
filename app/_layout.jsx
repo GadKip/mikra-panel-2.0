@@ -4,7 +4,6 @@ import React, { useEffect } from 'react';
 import "../global.css";
 import { StatusBar } from 'expo-status-bar';
 import { GlobalProvider } from "../context/GlobalProvider";
-import { useFonts } from 'expo-font';
 import { AlertProvider } from "../context/AlertContext";
 import ErrorBoundary from '../components/ErrorBoundary';
 import { RTLProvider } from '../context/RTLContext';
@@ -12,16 +11,6 @@ import { RTLProvider } from '../context/RTLContext';
 SplashScreen.preventAutoHideAsync();
 
 const Layout = () => {
-    const [fontsLoaded, error] = useFonts({
-        "SILEOTSR": require("../assets/fonts/SILEOTSR.ttf"),
-        "SILEOT": require("../assets/fonts/SILEOT.ttf")
-    });
-
-    useEffect(() => {
-        if (error) throw error;
-        if (fontsLoaded) SplashScreen.hideAsync();
-    }, [fontsLoaded, error]);
-    if (!fontsLoaded && !error) return null;
 
     return (
         <GlobalProvider>

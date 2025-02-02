@@ -14,8 +14,13 @@ module.exports = {
           700: '#2a2a2a',      // Secondary background
           800: '#1f1f1f',
         }
+      },
+      fontFamily: {
+        'ezra': ['"Ezra SIL SR"', 'Arial', 'sans-serif'],
+        'guttman': ['"Guttman Keren"', 'Arial', 'sans-serif'],
+        'david': ['David', 'Arial', 'sans-serif'],
       }
     }
   },
   plugins: []
-}
+};
