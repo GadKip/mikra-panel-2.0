@@ -16,6 +16,7 @@
     "@react-native-picker/picker": "2.9.0",
     "@remix-run/node": "^2.15.0",
     "@remix-run/server-runtime": "^2.15.0",
+    "@vercel/analytics": "^1.4.1",
     "appwrite": "^16.0.2",
     "cookie": "^0.7.0",
     "expo": "~52.0.20",

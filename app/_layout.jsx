@@ -23,7 +23,6 @@ const Layout = () => {
                                 <Stack.Screen name="upload" options={{ headerShown: false }} />
                                 <Stack.Screen name="browse" options={{ headerShown: false }} />
                                 <Stack.Screen name="(auth)/sign-in" />
-                                <Stack.Screen name="(auth)/sign-up" options={{ href: null }} />
                             </Stack>
                         </SafeAreaView>
                     </ErrorBoundary>
