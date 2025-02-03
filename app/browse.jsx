@@ -4,7 +4,13 @@ import { useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useGlobalContext } from '../context/GlobalProvider';
-import { listFiles, deleteFile, updateFile, deleteMultipleFiles } from '../lib/appwrite';
+import { 
+    listFiles, 
+    deleteFile, 
+    updateFile, 
+    deleteMultipleFiles,
+    reorderEpisode
+} from '../lib/appwrite';
 import CustomButton from '../components/CustomButton';
 import Loader from '../components/Loader';
 import { useCustomAlert } from '../lib/utils';
@@ -16,6 +22,7 @@ import Header from '../components/Header';
 import EpisodeListItem from '../components/EpisodeListItem';
 import { useTheme } from '../context/ThemeContext';
 import ThemedText from '../components/ThemedText';
+import DraggableEpisodeList from '../components/DraggableEpisodeList';
 
 const Browse = () => {
     // State management
@@ -88,12 +95,101 @@ const Browse = () => {
             await fetchBooks();
             customAlert('הצלחה', 'הפרק עודכן בהצלחה');
         } catch (error) {
+            console.error('Edit error:', error);
             handleError(error, {
                 title: 'שגיאה בעדכון פרק',
                 fallbackMessage: 'לא ניתן לעדכן את הפרק'
             });
-        } finally {
-            setEditingEpisode(null);
+        }
+    };
+
+    const handleReorder = async (episode, newOrder) => {
+        try {
+            await withLoading(async () => {
+                await reorderEpisode(episode.$id, newOrder, client);
+                await fetchBooks();
+            });
+            customAlert('הצלחה', 'סדר הפרקים עודכן בהצלחה');
+        } catch (error) {
+            handleError(error, {
+                title: 'שגיאה בסידור פרקים',
+                fallbackMessage: 'לא ניתן לעדכן את סדר הפרקים'
+            });
+        }
+    };
+
+    // Add this function to handle batch reordering
+    const handleReorderBatch = async (updatedEpisodes) => {
+        try {
+            await withLoading(async () => {
+                // Update all episodes with their new orders
+                await Promise.all(updatedEpisodes.map(episode => 
+                    reorderEpisode(episode.$id, episode.episodeOrder, client)
+                ));
+                await fetchBooks();
+            });
+            customAlert('הצלחה', 'סדר הפרקים עודכן בהצלחה');
+        } catch (error) {
+            handleError(error, {
+                title: 'שגיאה בסידור פרקים',
+                fallbackMessage: 'לא ניתן לעדכן את סדר הפרקים'
+            });
+        }
+    };
+
+    const handleMoveUp = async (episode) => {
+        try {
+            // Find all episodes in the same book
+            const bookEpisodes = Object.values(books[episode.category][episode.book]);
+            const sortedEpisodes = bookEpisodes.sort((a, b) => a.episodeOrder - b.episodeOrder);
+            
+            // Find current episode index
+            const currentIndex = sortedEpisodes.findIndex(ep => ep.$id === episode.$id);
+            if (currentIndex <= 0) return; // Already at top
+            
+            // Get previous episode
+            const prevEpisode = sortedEpisodes[currentIndex - 1];
+            const newOrder = prevEpisode.episodeOrder;
+            const prevOrder = episode.episodeOrder;
+            
+            // Swap orders
+            await withLoading(async () => {
+                await reorderEpisode(episode.$id, newOrder, client);
+                await reorderEpisode(prevEpisode.$id, prevOrder, client);
+                await fetchBooks();
+            });
+            
+            customAlert('הצלחה', 'סדר הפרקים עודכן בהצלחה');
+        } catch (error) {
+            handleError(error);
+        }
+    };
+
+    const handleMoveDown = async (episode) => {
+        try {
+            // Find all episodes in the same book
+            const bookEpisodes = Object.values(books[episode.category][episode.book]);
+            const sortedEpisodes = bookEpisodes.sort((a, b) => a.episodeOrder - b.episodeOrder);
+            
+            // Find current episode index
+            const currentIndex = sortedEpisodes.findIndex(ep => ep.$id === episode.$id);
+            if (currentIndex >= sortedEpisodes.length - 1) return; // Already at bottom
+            
+            // Get next episode
+            const nextEpisode = sortedEpisodes[currentIndex + 1];
+            const newOrder = nextEpisode.episodeOrder;
+            const nextOrder = episode.episodeOrder;
+            
+            // Swap orders
+            await withLoading(async () => {
+                await reorderEpisode(episode.$id, newOrder, client);
+                await reorderEpisode(nextEpisode.$id, nextOrder, client);
+                await fetchBooks();
+            });
+            
+            customAlert('הצלחה', 'סדר הפרקים עודכן בהצלחה');
+        } catch (error) {
+            handleError(error);
         }
     };
 
@@ -144,7 +240,7 @@ const Browse = () => {
 
     // Render methods
     const renderEpisodeList = (episodes) => (
-        <ScrollView style={{ maxHeight: 200 }}>
+        <View>
             {episodes.map(episode => (
                 <EpisodeListItem
                     key={episode.$id}
@@ -153,9 +249,11 @@ const Browse = () => {
                     onEdit={setEditingEpisode}
                     onToggleSelection={toggleEpisodeSelection}
                     isSelected={selectedEpisodes.some(selected => selected.$id === episode.$id)}
+                    onMoveUp={handleMoveUp}
+                    onMoveDown={handleMoveDown}
                 />
             ))}
-        </ScrollView>
+        </View>
     );
 
     const renderBookItem = ([bookName, episodes]) => (
@@ -210,8 +308,9 @@ const Browse = () => {
             <EditModal
                 isVisible={!!editingEpisode}
                 onClose={() => setEditingEpisode(null)}
+                initialData={editingEpisode}
                 onSubmit={handleEdit}
-                initialData={editingEpisode}/>
+            />
         </SafeAreaView>
     );
 };

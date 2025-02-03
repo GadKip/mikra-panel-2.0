@@ -8,6 +8,7 @@ import { AlertProvider } from "../context/AlertContext";
 import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import ErrorBoundary from '../components/ErrorBoundary';
 import { RTLProvider } from '../context/RTLContext';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -15,25 +16,27 @@ const LayoutContent = () => {
   const { isDark } = useTheme();
   
   return (
-    <RTLProvider>
-      <AlertProvider>
-        <ErrorBoundary>
-          <SafeAreaView className={`flex-1 ${isDark ? 'bg-background-dark' : 'bg-background-light'}`}>
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="index" options={{ headerShown: false }} />
-              <Stack.Screen name="upload" options={{ headerShown: false }} />
-              <Stack.Screen name="browse" options={{ headerShown: false }} />
-              <Stack.Screen name="(auth)/sign-in" />
-            </Stack>
-          </SafeAreaView>
-        </ErrorBoundary>
-        <StatusBar style={isDark ? "light" : "dark"} />
-      </AlertProvider>
-    </RTLProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <RTLProvider>
+        <AlertProvider>
+          <ErrorBoundary>
+            <SafeAreaView className={`flex-1 ${isDark ? 'bg-background-dark' : 'bg-background-light'}`}>
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="index" options={{ headerShown: false }} />
+                <Stack.Screen name="upload" options={{ headerShown: false }} />
+                <Stack.Screen name="browse" options={{ headerShown: false }} />
+                <Stack.Screen name="(auth)/sign-in" />
+              </Stack>
+            </SafeAreaView>
+          </ErrorBoundary>
+          <StatusBar style={isDark ? "light" : "dark"} />
+        </AlertProvider>
+      </RTLProvider>
+    </GestureHandlerRootView>
   );
 };
 
-const Layout = () => {
+export default function Layout() {
   return (
     <GlobalProvider>
       <ThemeProvider>
@@ -41,6 +44,4 @@ const Layout = () => {
       </ThemeProvider>
     </GlobalProvider>
   );
-};
-
-export default Layout;
+}

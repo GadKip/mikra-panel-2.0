@@ -7,9 +7,8 @@ import "../../global.css";
 import images from '../../constants/images';
 import FormField from '../../components/FormField';
 import { useState } from 'react';
-import { getCurrentUser, signIn } from '../../lib/appwrite';
+import { signIn } from '../../lib/appwrite';
 import { useGlobalContext } from "../../context/GlobalProvider";
-import alert from "../../components/alert";
 import Loader from '../../components/Loader'; // Import Loader
 import { useLoadingState } from '../../hooks/useLoadingState';
 import { useResponsive } from '../../hooks/useResponsive';
@@ -86,15 +85,7 @@ export default function SignIn() {
             containerStyles="mt-7"
             isLoading={isLoading}
           />
-{/*           <View className="justify-center pt-5 flex-row gap-2">
-            <Link href="/sign-up" className={`text-lg ${isDark ? 'text-secondary-dark' : 'text-secondary-light'}`}>
-              הירשם
-            </Link>
-            <ThemedText dir='rtl' className="text-lg">
-              אין לך משתמש?
-            </ThemedText>
-          </View>
- */}        </View>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

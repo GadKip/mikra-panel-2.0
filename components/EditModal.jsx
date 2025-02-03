@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Modal, TouchableOpacity } from 'react-native';
+import PropTypes from 'prop-types';
 import FormField from './FormField';
 import Dropdown from './Dropdown';
 import CustomButton from './CustomButton';
@@ -8,14 +9,14 @@ import { useResponsive } from '../hooks/useResponsive';
 import ThemedText from './ThemedText';
 import { useTheme } from '../context/ThemeContext';
 
-const EditModal = ({ isVisible, onClose, bookId, initialData }) => {
-    const { isDark } = useTheme(); // Add this
+const EditModal = ({ isVisible, onClose, bookId, initialData, onSubmit }) => {
+    const { isDark } = useTheme();
     const { getResponsiveValue } = useResponsive();
     const [form, setForm] = useState({
         category: '',
         book: '',
         episode: '',
-        episodeOrder: '' // Add episode order field
+        episodeOrder: ''
     });
     const [books, setBooks] = useState([]);
 
@@ -25,10 +26,9 @@ const EditModal = ({ isVisible, onClose, bookId, initialData }) => {
                 category: initialData.category || '',
                 book: initialData.book || '',
                 episode: initialData.episode || '',
-                episodeOrder: initialData.episodeOrder?.toString() || '' // Add episode order
+                episodeOrder: initialData.episodeOrder?.toString() || ''
             });
             if (initialData.category) {
-                // Get just the array of books for the selected category
                 const categoryBooks = booksData.books[initialData.category] || [];
                 setBooks(categoryBooks);
             }
@@ -38,14 +38,15 @@ const EditModal = ({ isVisible, onClose, bookId, initialData }) => {
     const handleChange = (name, value) => {
         setForm({ ...form, [name]: value });
         if (name === 'category') {
-            // Get just the array of books for the selected category
             const categoryBooks = booksData.books[value] || [];
             setBooks(categoryBooks);
         }
     };
 
     const handleSubmit = () => {
-        onSubmit(form);
+        if (typeof onSubmit === 'function') {
+            onSubmit(form);
+        }
         onClose();
     };
 
@@ -94,11 +95,11 @@ const EditModal = ({ isVisible, onClose, bookId, initialData }) => {
                         isDark={isDark}
                     />
                     <FormField
-                        title="סדר פרק"
+                        title="מיקום פרק"
                         value={form.episodeOrder}
                         handleChangeText={(e) => handleChange('episodeOrder', e)}
                         keyboardType="numeric"
-                        placeholder="הזן מספר לסידור (אופציונלי)"
+                        placeholder="הזן מספר מיקום (1.0, 1.5, 2.0 וכו')"
                         otherStyles="mb-6"
                         isDark={isDark}
                     />
@@ -121,6 +122,13 @@ const EditModal = ({ isVisible, onClose, bookId, initialData }) => {
             </View>
         </Modal>
     );
+};
+
+EditModal.propTypes = {
+    isVisible: PropTypes.bool.isRequired,
+    onClose: PropTypes.func.isRequired,
+    onSubmit: PropTypes.func.isRequired,
+    initialData: PropTypes.object
 };
 
 export default EditModal;
