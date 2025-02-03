@@ -7,29 +7,36 @@ import "../global.css";
 import images from '../constants/images';
 import 'react-native-url-polyfill/auto';
 import { useGlobalContext } from '../context/GlobalProvider';
-import { Analytics } from "@vercel/analytics/react"
+import { useTheme } from '../context/ThemeContext';
+import ThemedText from '../components/ThemedText';
 
 export default function App() {
     const {loading, loggedIn} = useGlobalContext();
+    const { isDark } = useTheme();
     const router = useRouter();
 
   if (!loading && loggedIn) return <Redirect href="./upload" />;
 
   return (
-    <SafeAreaView className="bg-primary h-full">
+    <SafeAreaView className={`h-full ${isDark ? 'bg-background-dark' : 'bg-background-light'}`}>
       <Loader isLoading={loading} />
       <Text style={{display:"none"}}>{/* The fix is here */}</Text>
-      <Analytics />
       <ScrollView contentContainerStyle={{ height: '100%' }}>
         <View className="w-full justify-center items-center px-4 my-6 flex-1">
           <Image source={images.logo}
               resizeMode="contain"
               className="flex-1 w-1/4"/>
-          <Text className="flex-col justify-center text-4xl text-gray-50 mt-7">Mikra Panel 2.0</Text>
+          <ThemedText className="flex-col justify-center text-4xl mt-7">
+            Mikra Panel 2.0
+          </ThemedText>
+          <Text className={`flex-col justify-center text-2xl ${isDark ? 'text-text-dark' : 'text-text-light'} mt-7`}>
+            By Gadi K.
+          </Text>
           <CustomButton 
           title="לכניסה"
-          handlePress={() => router.replace('./(auth)/sign-in')}
-          containerStyles="font-mainfont flex-col mt-7 mb-40 justify-center"
+          handlePress={() => router.replace('/sign-in')}
+          containerStyles="mt-7"
+          isDark={isDark}
           />
         </View>
       </ScrollView>

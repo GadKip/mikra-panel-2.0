@@ -10,9 +10,11 @@ import { createUser } from '../../lib/appwrite';
 import { useGlobalContext } from "../../context/GlobalProvider";
 import alert from "../../components/alert";
 import Loader from '../../components/Loader'; // Import Loader
+import { useTheme } from '../../context/ThemeContext'; // Import useTheme
 
-const SignUp = () => {
+export default function SignUp() {
   const { setUser, setLoggedIn, client, loading, setLoading } = useGlobalContext(); // Get setLoading
+  const { isDark } = useTheme(); // Use useTheme
   const [isSubmitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
       username:'',
@@ -44,19 +46,19 @@ const SignUp = () => {
 
   
   return (
-    <SafeAreaView className="bg-primary h-full">
+    <SafeAreaView className={`h-full ${isDark ? 'bg-background-dark' : 'bg-background-light'}`}>
       <Loader isLoading={loading} />
-      <Text style={{display:"none"}}>{/* The fix is here */}</Text>
       <ScrollView contentContainerStyle={{ height: '100%' }}>
         <View className=" justify-center items-center min-h-[85vh] px-4 my-6 flex-1">
           <Image source={images.logo}
                 resizeMode='contain' className="flex-1 w-4 h-4 "/>
-          <Text dir="rtl" className="text-4xl text-gray-50">הרשמה</Text>
+          <Text dir="rtl" className={`text-4xl ${isDark ? 'text-text-dark' : 'text-text-light'}`}>הרשמה</Text>
             <FormField
               title='שם משתמש'
               value={form.username}
               handleChangeText={(e) => setForm({...form, username: e})}
               otherStyles='mt-7'
+              isDark={isDark}
             />
           <FormField
             title='כתובת מייל'
@@ -64,6 +66,7 @@ const SignUp = () => {
             handleChangeText={(e) => setForm({...form, email: e})}
             otherStyles='mt-7'
             keyBoardType='email-address'
+            isDark={isDark}
           />
           <FormField
             title='סיסמה'
@@ -71,21 +74,23 @@ const SignUp = () => {
             handleChangeText={(e) => setForm({...form, password: e})}
             otherStyles='mt-7'
             keyBoardType='password'
+            isDark={isDark}
           />
           <CustomButton 
             title="הירשם"
             handlePress={submit}
             containerStyles="mt-7"
             isLoading={isSubmitting}
+            isDark={isDark}
           />
           <View className="justify-center pt-5 flex-row gap-2">
               <Link
                   href="/sign-in"
-                  className="text-lg text-secondary"
+                  className={`text-lg ${isDark ? 'text-secondary-dark' : 'text-secondary-light'}`}
               >
                 התחבר
               </Link>
-              <Text dir='rtl' className="text-lg text-gray-100">
+              <Text dir='rtl' className={`text-lg ${isDark ? 'text-text-dark' : 'text-text-light'}`}>
                   יש לך כבר משתמש?
               </Text>
           </View>
@@ -94,5 +99,3 @@ const SignUp = () => {
     </SafeAreaView>
   );
 };
-
-export default SignUp;

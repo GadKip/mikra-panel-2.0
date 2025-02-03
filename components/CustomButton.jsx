@@ -1,7 +1,7 @@
 import { Text, TouchableOpacity } from 'react-native'
 import React, { useState } from 'react'
 
-const CustomButton = ({title, handlePress, containerStyles, textStyles, isLoading}) => {
+const CustomButton = ({title, handlePress, containerStyles, textStyles, isLoading, isDark}) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -10,7 +10,7 @@ const CustomButton = ({title, handlePress, containerStyles, textStyles, isLoadin
       activeOpacity={0.7}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`bg-secondary rounded-xl min-h-12 min-w-40 justify-center items-center
+      className={`${isDark ? 'bg-secondary-dark' : 'bg-secondary-light'} rounded-xl min-h-12 min-w-40 justify-center items-center
       ${containerStyles} 
       ${isLoading ? 'opacity-50' : ''}
       ${isHovered ? 'opacity-80' : ''}`}
@@ -20,7 +20,7 @@ const CustomButton = ({title, handlePress, containerStyles, textStyles, isLoadin
       }}  
     >
       <Text 
-        className={`text-primary text-2xl ${textStyles}`}
+        className={`${isDark ? 'text-text-dark' : 'text-text-light'} text-2xl ${textStyles}`}
         dir="rtl"
       >
         {title}

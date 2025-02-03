@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import CustomButton from './CustomButton';
+import { useTheme } from '../context/ThemeContext';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {

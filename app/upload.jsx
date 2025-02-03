@@ -13,6 +13,8 @@ import Loader from '../components/Loader';
 import { useResponsive } from '../hooks/useResponsive';
 import Header from '../components/Header';
 import { useLoadingState } from '../hooks/useLoadingState';
+import { useTheme } from '../context/ThemeContext';
+import ThemedText from '../components/ThemedText';
 
 const Upload = () => {
     const { user, setUser, loggedIn, client } = useGlobalContext();
@@ -24,6 +26,7 @@ const Upload = () => {
     const showAlert = useCustomAlert();
     const handleUploadFileError = useHandleUploadFileError();
     const { getResponsiveValue } = useResponsive();
+    const { isDark } = useTheme();
 
     useEffect(() => {
         if (!user && client) {
@@ -93,7 +96,7 @@ const Upload = () => {
                         client,
                         user.$id
                     );
-                    showAlert("Success", "File upload successful!");
+                    showAlert("הצלחנו", "הקובץ עלה בהצלחה!");
                     
                     // Reset form
                     setForm({ category: '', book: '', episode: '' });
@@ -112,7 +115,7 @@ const Upload = () => {
     if (!loggedIn && !isLoading) return <Redirect href='/' />;
 
     return (
-        <SafeAreaView className='flex-1 bg-primary'>
+        <SafeAreaView className={`flex-1 ${isDark ? 'bg-background-dark' : 'bg-background-light'}`}>
             <Loader isLoading={isLoading} />
             <Header currentPage="upload" />
             <View className={getResponsiveValue({
@@ -120,7 +123,9 @@ const Upload = () => {
                 tablet: 'w-4/5 flex-1 items-center justify-center mx-auto my-8',
                 desktop: 'w-3/5 flex-1 items-center justify-center mx-auto my-10'
             })}>
-                <Text className="text-center text-3xl text-gray-50">העלאת פרקים</Text>
+                <ThemedText className="text-center text-3xl">
+                    העלאת פרקים
+                </ThemedText>
                 <Dropdown
                     title="תורה \ נביאים \ כתובים"
                     value={form.category}
@@ -149,14 +154,17 @@ const Upload = () => {
                     value={form.episode}
                     handleChangeText={(e) => handleChange('episode', e)}
                     otherStyles="mt-7"
+                    isDark={isDark}
                 />
                 {selectedFile && (
-                    <View style={{ flexDirection: "row", alignItems: 'center', margin: 10, backgroundColor: '#24252f', padding: 8, borderRadius: 6, width: 280 }}>
-                        <Text numberOfLines={1} ellipsizeMode='middle' style={{ fontSize: 16, fontWeight: "bold", color: '#f0f0f0', flex: 1 }}>
+                    <View className={`flex-row items-center m-2.5 ${isDark ? 'bg-surface-dark' : 'bg-surface-light'} p-2 rounded-lg w-[280px]`}>
+                        <ThemedText className="text-base font-bold flex-1" numberOfLines={1} ellipsizeMode='middle'>
                             File Selected: {selectedFile.name}
-                        </Text>
+                        </ThemedText>
                         <TouchableOpacity onPress={handleClearFile}>
-                            <Text style={{ fontSize: 12, color: 'white', backgroundColor: '#ff2442', borderRadius: 20, width: 25, height: 25, lineHeight: 20, textAlign: 'center' }}>X</Text>
+                            <Text className={`text-xs ${isDark ? 'text-text-dark' : 'text-text-light'}`}>
+                                Clear
+                            </Text>
                         </TouchableOpacity>
                     </View>
                 )}

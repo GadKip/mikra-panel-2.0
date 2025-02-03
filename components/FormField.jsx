@@ -1,41 +1,44 @@
-import { View, Text, TextInput } from 'react-native';
+import { TextInput, View } from 'react-native';
 import React from 'react';
+import InputWrapper from './InputWrapper';
+import { useTheme } from '../context/ThemeContext';
 
 const FormField = ({ 
     title, 
     value, 
     handleChangeText, 
-    otherStyles, 
+    otherStyles = '', 
     keyBoardType = 'default',
     onSubmitEditing,
-    placeholder 
+    placeholder,
+    ...props
 }) => {
-    // Determine if the field should be LTR based on keyBoardType or title
+    const { isDark } = useTheme();
     const isLTRField = keyBoardType === 'password' || 
                       keyBoardType === 'email-address' || 
                       title.includes('מייל') ||
-                      title.includes('סיסמה') ||
-                      title.includes('משתמש');
+                      title.includes('סיסמה');
 
     return (
-        <View className={`w-3/4 space-y-2 relative ${otherStyles}`}>
-            <Text className="text-base text-gray-100 text-right">{title}</Text>
-            <View className="border border-gray-600 h-16 px-4 bg-gray-700/40 rounded-xl">
+        <InputWrapper title={title} otherStyles={otherStyles}>
+            <View className={`border ${isDark ? 'border-border-dark' : 'border-border-light'} h-16 px-4 ${isDark ? 'bg-surface-dark/40' : 'bg-surface-light/40'} rounded-xl`}>
                 <TextInput
                     value={value}
                     onChangeText={handleChangeText}
-                    placeholder={placeholder}
-                    className={`flex-1 text-white text-lg h-full ${isLTRField ? 'text-left' : 'text-right'}`}
-                    placeholderTextColor="#666"
+                    keyboardType={keyBoardType === 'password' ? 'default' : keyBoardType}
                     secureTextEntry={keyBoardType === 'password'}
-                    keyboardType={keyBoardType}
-                    returnKeyType="done"
                     onSubmitEditing={onSubmitEditing}
-                    textAlign={isLTRField ? 'left' : 'right'}
-                    dir={isLTRField ? 'ltr' : 'rtl'}
+                    placeholder={placeholder}
+                    placeholderTextColor={isDark ? '#666666' : '#999999'}
+                    className={`flex-1 ${isDark ? 'text-text-dark' : 'text-text-light'} text-lg h-full`}
+                    style={{
+                        textAlign: isLTRField ? 'left' : 'right',
+                        direction: isLTRField ? 'ltr' : 'rtl'
+                    }}
+                    {...props}
                 />
             </View>
-        </View>
+        </InputWrapper>
     );
 };
 

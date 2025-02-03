@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../context/ThemeContext';
 
 /**
  * @typedef {Object} EpisodeListItemProps
@@ -11,6 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
  */
 
 const EpisodeListItem = ({ episode, onDelete, onEdit, onToggleSelection, isSelected }) => {
+    const { isDark } = useTheme();
     return (
         <View className="flex-row justify-between items-center bg-primary rounded-lg mb-2 p-3">
             <View className="flex-row gap-2">

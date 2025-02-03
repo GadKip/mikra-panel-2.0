@@ -14,6 +14,8 @@ import { useResponsive } from '../hooks/useResponsive';
 import { useErrorHandler } from '../hooks/useErrorHandler';
 import Header from '../components/Header';
 import EpisodeListItem from '../components/EpisodeListItem';
+import { useTheme } from '../context/ThemeContext';
+import ThemedText from '../components/ThemedText';
 
 const Browse = () => {
     // State management
@@ -30,6 +32,7 @@ const Browse = () => {
     const { client } = useGlobalContext();
     const customAlert = useCustomAlert();
     const router = useRouter();
+    const { isDark } = useTheme();
 
     useEffect(() => {
         fetchBooks();
@@ -160,7 +163,9 @@ const Browse = () => {
             <Pressable 
                 onPress={() => toggleBook(bookName)}
                 className="flex-row-reverse justify-between items-center mb-2">
-                <Text className="text-text text-xl text-right w-full" dir="rtl">{bookName}</Text>
+                <ThemedText className="text-xl text-right">
+                    {bookName}
+                </ThemedText>
                 <Ionicons 
                     name={expandedBooks[bookName] ? "chevron-down" : "chevron-back"} 
                     size={20} 
@@ -171,20 +176,22 @@ const Browse = () => {
     );
 
     return (
-        <SafeAreaView className="flex-1 bg-primary">
+        <SafeAreaView className={`flex-1 ${isDark ? 'bg-background-dark' : 'bg-background-light'}`}>
             <Loader isLoading={isLoading}/>
             <Header currentPage="browse"/>
             <ScrollView className="flex-1 p-4">
                 {Object.entries(books).map(([category, categoryBooks]) => (
-                    <View key={category} className="mb-8 bg-secondary rounded-lg p-4">
+                    <View key={category} className={`mb-8 ${isDark ? 'bg-surface-dark' : 'bg-surface-light'} rounded-lg p-4`}>
                         <Pressable 
                             onPress={() => toggleCategory(category)}
                             className="flex-row-reverse justify-between items-center mb-4 border-b border-primary pb-2">
-                            <Text className="text-text text-2xl text-right w-full" dir="rtl">{category}</Text>
+                            <ThemedText className="text-2xl text-right w-full" dir="rtl">
+                                {category}
+                            </ThemedText>
                             <Ionicons 
                                 name={expandedCategories[category] ? "chevron-down" : "chevron-back"} 
                                 size={24} 
-                                color="white"/>
+                                color={isDark ? "#ffffff" : "#000000"}/>
                         </Pressable>
                         {expandedCategories[category] !== false && 
                             Object.entries(categoryBooks).map(renderBookItem)}

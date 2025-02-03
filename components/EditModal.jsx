@@ -5,8 +5,11 @@ import Dropdown from './Dropdown';
 import CustomButton from './CustomButton';
 import booksData from '../constants/booksData.json';
 import { useResponsive } from '../hooks/useResponsive';
+import ThemedText from './ThemedText';
+import { useTheme } from '../context/ThemeContext';
 
-const EditModal = ({ isVisible, onClose, onSubmit, initialData }) => {
+const EditModal = ({ isVisible, onClose, bookId, initialData }) => {
+    const { isDark } = useTheme(); // Add this
     const { getResponsiveValue } = useResponsive();
     const [form, setForm] = useState({
         category: '',
@@ -54,17 +57,10 @@ const EditModal = ({ isVisible, onClose, onSubmit, initialData }) => {
             onRequestClose={onClose}
         >
             <View className="flex-1 justify-center items-center bg-black/50">
-                <View className={getResponsiveValue({
-                    mobile: "w-[90%] bg-white rounded-lg p-4",
-                    tablet: "w-[70%] bg-white rounded-lg p-6",
-                    desktop: "w-[50%] bg-white rounded-lg p-8"
-                })}>
-                    <View className="flex-row justify-between items-center mb-6">
-                        <Text className="text-2xl">עריכת פרק</Text>
-                        <TouchableOpacity onPress={onClose}>
-                            <Text className="text-xl">✕</Text>
-                        </TouchableOpacity>
-                    </View>
+                <View className={`w-11/12 p-6 rounded-2xl ${isDark ? 'bg-surface-dark' : 'bg-surface-light'}`}>
+                    <ThemedText className="text-2xl mb-4 text-center">
+                        {bookId ? 'עריכת פרק' : 'הוספת פרק'}
+                    </ThemedText>
                     
                     <Dropdown
                         title="תורה \ נביאים \ כתובים"
@@ -77,6 +73,7 @@ const EditModal = ({ isVisible, onClose, onSubmit, initialData }) => {
                             { label: 'כתובים', value: 'כתובים' },
                         ]}
                         otherStyles="mb-4"
+                        isDark={isDark}
                     />
                     <Dropdown
                         title="ספר"
@@ -84,7 +81,7 @@ const EditModal = ({ isVisible, onClose, onSubmit, initialData }) => {
                         placeholder="בחר ספר"
                         handleChangeText={(e) => handleChange('book', e)}
                         items={books.map(book => ({
-                            label: book.name,  // Use book.name for both label and value
+                            label: book.name,
                             value: book.name
                         }))}
                         otherStyles="mb-4"
@@ -94,6 +91,7 @@ const EditModal = ({ isVisible, onClose, onSubmit, initialData }) => {
                         value={form.episode}
                         handleChangeText={(e) => handleChange('episode', e)}
                         otherStyles="mb-4"
+                        isDark={isDark}
                     />
                     <FormField
                         title="סדר פרק"
@@ -102,18 +100,21 @@ const EditModal = ({ isVisible, onClose, onSubmit, initialData }) => {
                         keyboardType="numeric"
                         placeholder="הזן מספר לסידור (אופציונלי)"
                         otherStyles="mb-6"
+                        isDark={isDark}
                     />
                     
-                    <View className="flex-row justify-end space-x-4">
+                    <View className="flex-row justify-end space-x-4 mt-6">
                         <CustomButton
                             title="ביטול"
                             handlePress={onClose}
-                            containerStyles="bg-gray-500"
+                            containerStyles={`px-4 ${isDark ? 'bg-gray-600' : 'bg-gray-300'}`}
+                            isDark={isDark}
                         />
                         <CustomButton
                             title="שמור"
                             handlePress={handleSubmit}
-                            containerStyles="bg-primary"
+                            containerStyles="px-4"
+                            isDark={isDark}
                         />
                     </View>
                 </View>

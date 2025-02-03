@@ -6,13 +6,33 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: '#1a1a1a',    // Dark background
-        secondary: '#4a9eff',  // Blue accent color
-        text: '#ffffff',       // White text
-        'gray': {
-          600: '#666666',      // Inactive tab color
-          700: '#2a2a2a',      // Secondary background
-          800: '#1f1f1f',
+        primary: {
+          light: '#ffffff',
+          dark: '#1a1a1a'
+        },
+        secondary: {
+          light: '#2563eb',
+          dark: '#4a9eff'
+        },
+        text: {
+          light: '#000000',
+          dark: '#ffffff'
+        },
+        background: {
+          light: '#f3f4f6',
+          dark: '#161622'
+        },
+        surface: {
+          light: '#ffffff',
+          dark: '#2a2a2a'
+        },
+        border: {
+          light: '#e5e7eb',
+          dark: '#4a5568'
+        },
+        error: {
+          light: '#dc2626',
+          dark: '#ef4444'
         }
       },
       fontFamily: {
