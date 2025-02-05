@@ -1,7 +1,7 @@
-import { View, Text, ScrollView, Pressable } from 'react-native';
+import { View, Text, ScrollView, Pressable, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useGlobalContext } from '../context/GlobalProvider';
 import { 
@@ -30,6 +30,7 @@ const Browse = () => {
     const [selectedEpisodes, setSelectedEpisodes] = useState([]);
     const [expandedCategories, setExpandedCategories] = useState({});
     const [expandedBooks, setExpandedBooks] = useState({});
+    const [bookSelection, setBookSelection] = useState({}); // Track book-level selection
 
     // Hooks
     const { withLoading, isLoading } = useLoadingState();
@@ -59,16 +60,19 @@ const Browse = () => {
                 // Initialize expandedCategories and expandedBooks to false
                 const initialExpandedCategories = {};
                 const initialExpandedBooks = {};
+                const initialBookSelection = {}; // Initialize book selection state
 
                 Object.keys(files).forEach(category => {
                     initialExpandedCategories[category] = false;
                     Object.keys(files[category]).forEach(book => {
                         initialExpandedBooks[book] = false;
+                        initialBookSelection[book] = false; // Initialize book selection to false
                     });
                 });
 
                 setExpandedCategories(initialExpandedCategories);
                 setExpandedBooks(initialExpandedBooks);
+                setBookSelection(initialBookSelection); // Set initial book selection state
             }, true);
         } catch (error) {
             handleError(error, {
@@ -127,6 +131,7 @@ const Browse = () => {
                 await reorderEpisode(episode.$id, orderValue, client);
                 await fetchBooks();
             });
+            
             customAlert('הצלחה', 'סדר הפרקים עודכן בהצלחה');
         } catch (error) {
             handleError(error, {
@@ -229,6 +234,29 @@ const Browse = () => {
         setExpandedBooks(prev => ({...prev, [bookName]: !prev[bookName]}));
     };
 
+    const toggleBookSelection = (bookName, episodes) => {
+        setBookSelection(prev => ({
+            ...prev,
+            [bookName]: !prev[bookName]
+        }));
+
+        // If selecting the book, add all episodes to selectedEpisodes
+        if (!bookSelection[bookName]) {
+            setSelectedEpisodes(prev => {
+                const newEpisodes = episodes.filter(episode =>
+                    !prev.some(selected => selected.$id === episode.$id)
+                );
+                return [...prev, ...newEpisodes];
+            });
+        }
+        // If unselecting the book, remove all episodes from selectedEpisodes
+        else {
+            setSelectedEpisodes(prev =>
+                prev.filter(episode => !episodes.some(e => e.$id === episode.$id))
+            );
+        }
+    };
+
     // Render methods
     const renderEpisodeList = (episodes) => (
         <View>
@@ -249,17 +277,28 @@ const Browse = () => {
 
     const renderBookItem = ([bookName, episodes]) => (
         <View key={bookName} className="mb-4">
-            <Pressable 
-                onPress={() => toggleBook(bookName)}
-                className="flex-row-reverse justify-between items-center mb-2">
-                <ThemedText className="text-xl text-right">
-                    {bookName}
-                </ThemedText>
-                <Ionicons 
-                    name={expandedBooks[bookName] ? "chevron-down" : "chevron-back"} 
-                    size={20} 
-                    color="white"/>
-            </Pressable>
+            <View className="flex-row items-center justify-between">
+                <Pressable 
+                    onPress={() => toggleBook(bookName)}
+                    className="flex-row-reverse justify-between items-center mb-2 flex-1">
+                    <ThemedText className="text-xl text-right">
+                        {bookName}
+                    </ThemedText>
+                    <Ionicons 
+                        name={expandedBooks[bookName] ? "chevron-down" : "chevron-back"} 
+                        size={20} 
+                        color="white"/>
+                </Pressable>
+                <TouchableOpacity
+                    onPress={() => toggleBookSelection(bookName, episodes)}
+                    className="items-center">
+                    <Ionicons
+                        name={bookSelection[bookName] ? "checkbox-outline" : "square-outline"}
+                        size={24}
+                        color={isDark ? "#ffffff" : "#000000"}
+                    />
+                </TouchableOpacity>
+            </View>
             {expandedBooks[bookName] !== false && renderEpisodeList(episodes)}
         </View>
     );
