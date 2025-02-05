@@ -118,8 +118,13 @@ const Browse = () => {
 
     const handleReorder = async (episode, newOrder) => {
         try {
+            const orderValue = parseFloat(newOrder);
+            if (isNaN(orderValue)) {
+                throw new Error("Invalid order value");
+            }
+            
             await withLoading(async () => {
-                await reorderEpisode(episode.$id, newOrder, client);
+                await reorderEpisode(episode.$id, orderValue, client);
                 await fetchBooks();
             });
             customAlert('הצלחה', 'סדר הפרקים עודכן בהצלחה');
@@ -133,26 +138,22 @@ const Browse = () => {
 
     const handleMoveUp = async (episode) => {
         try {
-            // Find all episodes in the same book
             const bookEpisodes = Object.values(books[episode.category][episode.book]);
-            const sortedEpisodes = bookEpisodes.sort((a, b) => a.episodeOrder - b.episodeOrder);
+            const sortedEpisodes = bookEpisodes.sort((a, b) => Number(a.episodeOrder) - Number(b.episodeOrder));
             
-            // Find current episode index
             const currentIndex = sortedEpisodes.findIndex(ep => ep.$id === episode.$id);
-            if (currentIndex <= 0) return; // Already at top
+            if (currentIndex <= 0) return;
             
-            // Get previous episode
             const prevEpisode = sortedEpisodes[currentIndex - 1];
-            const newOrder = prevEpisode.episodeOrder;
-            const prevOrder = episode.episodeOrder;
-            
-            // Swap orders
+            const newOrder = Number(prevEpisode.episodeOrder);
+            const prevOrder = newOrder - 1;
+
             await withLoading(async () => {
-                await reorderEpisode(episode.$id, newOrder, client);
                 await reorderEpisode(prevEpisode.$id, prevOrder, client);
+                await reorderEpisode(episode.$id, newOrder, client);
                 await fetchBooks();
             });
-            
+
             customAlert('הצלחה', 'סדר הפרקים עודכן בהצלחה');
         } catch (error) {
             handleError(error);
@@ -161,23 +162,19 @@ const Browse = () => {
 
     const handleMoveDown = async (episode) => {
         try {
-            // Find all episodes in the same book
             const bookEpisodes = Object.values(books[episode.category][episode.book]);
-            const sortedEpisodes = bookEpisodes.sort((a, b) => a.episodeOrder - b.episodeOrder);
+            const sortedEpisodes = bookEpisodes.sort((a, b) => Number(a.episodeOrder) - Number(b.episodeOrder));
             
-            // Find current episode index
             const currentIndex = sortedEpisodes.findIndex(ep => ep.$id === episode.$id);
-            if (currentIndex >= sortedEpisodes.length - 1) return; // Already at bottom
+            if (currentIndex >= sortedEpisodes.length - 1) return;
             
-            // Get next episode
             const nextEpisode = sortedEpisodes[currentIndex + 1];
-            const newOrder = nextEpisode.episodeOrder;
-            const nextOrder = episode.episodeOrder;
-            
-            // Swap orders
+            const newOrder = Number(nextEpisode.episodeOrder);
+            const nextOrder = newOrder + 1;
+
             await withLoading(async () => {
-                await reorderEpisode(episode.$id, newOrder, client);
                 await reorderEpisode(nextEpisode.$id, nextOrder, client);
+                await reorderEpisode(episode.$id, newOrder, client);
                 await fetchBooks();
             });
             

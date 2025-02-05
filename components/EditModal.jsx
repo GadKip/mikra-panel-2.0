@@ -93,17 +93,7 @@ const EditModal = ({ isVisible, onClose, bookId, initialData, onSubmit }) => {
                         handleChangeText={(e) => handleChange('episode', e)}
                         otherStyles="mb-4"
                         isDark={isDark}
-                    />
-                    <FormField
-                        title="מיקום פרק"
-                        value={form.episodeOrder}
-                        handleChangeText={(e) => handleChange('episodeOrder', e)}
-                        keyboardType="numeric"
-                        placeholder="הזן מספר מיקום (1.0, 1.5, 2.0 וכו')"
-                        otherStyles="mb-6"
-                        isDark={isDark}
-                    />
-                    
+                    />                    
                     <View className="flex-row justify-end space-x-4 mt-6">
                         <CustomButton
                             title="ביטול"

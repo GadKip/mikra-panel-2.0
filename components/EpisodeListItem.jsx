@@ -58,9 +58,6 @@ const EpisodeListItem = ({
                 </View>
             </View>
             <View className="flex-row items-center gap-4">
-                <ThemedText className="text-sm opacity-50">
-                    {episode.episodeOrder.toFixed(1)}
-                </ThemedText>
                 <Pressable
                     onPress={() => onToggleSelection(episode)}
                     className="flex-row items-center gap-2">
