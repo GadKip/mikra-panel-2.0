@@ -22,7 +22,6 @@ import Header from '../components/Header';
 import EpisodeListItem from '../components/EpisodeListItem';
 import { useTheme } from '../context/ThemeContext';
 import ThemedText from '../components/ThemedText';
-import DraggableEpisodeList from '../components/DraggableEpisodeList';
 
 const Browse = () => {
     // State management
@@ -56,6 +55,20 @@ const Browse = () => {
             await withLoading(async () => {
                 const files = await listFiles(client);
                 setBooks(files);
+
+                // Initialize expandedCategories and expandedBooks to false
+                const initialExpandedCategories = {};
+                const initialExpandedBooks = {};
+
+                Object.keys(files).forEach(category => {
+                    initialExpandedCategories[category] = false;
+                    Object.keys(files[category]).forEach(book => {
+                        initialExpandedBooks[book] = false;
+                    });
+                });
+
+                setExpandedCategories(initialExpandedCategories);
+                setExpandedBooks(initialExpandedBooks);
             }, true);
         } catch (error) {
             handleError(error, {
@@ -107,25 +120,6 @@ const Browse = () => {
         try {
             await withLoading(async () => {
                 await reorderEpisode(episode.$id, newOrder, client);
-                await fetchBooks();
-            });
-            customAlert('הצלחה', 'סדר הפרקים עודכן בהצלחה');
-        } catch (error) {
-            handleError(error, {
-                title: 'שגיאה בסידור פרקים',
-                fallbackMessage: 'לא ניתן לעדכן את סדר הפרקים'
-            });
-        }
-    };
-
-    // Add this function to handle batch reordering
-    const handleReorderBatch = async (updatedEpisodes) => {
-        try {
-            await withLoading(async () => {
-                // Update all episodes with their new orders
-                await Promise.all(updatedEpisodes.map(episode => 
-                    reorderEpisode(episode.$id, episode.episodeOrder, client)
-                ));
                 await fetchBooks();
             });
             customAlert('הצלחה', 'סדר הפרקים עודכן בהצלחה');
