@@ -36,9 +36,10 @@ module.exports = {
         }
       },
       fontFamily: {
-        'ezra': ['"Ezra SIL SR"', 'Arial', 'sans-serif'],
-        'guttman': ['"Guttman Keren"', 'Arial', 'sans-serif'],
-        'david': ['David', 'Arial', 'sans-serif'],
+        'ezra': ['"Ezra SIL SR"', 'serif'],
+        'guttman': ['"Guttman Keren"', 'sans-serif'],
+        'david': ['David', 'sans-serif'],
+        'davidbd': ['DavidBD', 'sans-serif'],
       }
     }
   },

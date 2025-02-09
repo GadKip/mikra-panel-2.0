@@ -10,6 +10,13 @@ import ErrorBoundary from '../components/ErrorBoundary';
 import { RTLProvider } from '../context/RTLContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+const fonts = {
+  'Ezra SIL SR': require('../assets/fonts/Ezra SIL SR.ttf'),
+  'Guttman Keren': require('../assets/fonts/Guttman Keren.ttf'),
+  'David': require('../assets/fonts/David.ttf'),
+  'DavidBD': require('../assets/fonts/DavidBD.ttf'),
+}
+
 SplashScreen.preventAutoHideAsync();
 
 const LayoutContent = () => {
