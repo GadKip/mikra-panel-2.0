@@ -1,13 +1,21 @@
 {
+  "version": 2,
+  "buildCommand": "npm run build",
+  "outputDirectory": "web-build",
+  "framework": "react",
   "builds": [
     {
       "src": "package.json",
-      "use": "@vercel/node"
+      "use": "@vercel/static-build"
     }
   ],
-  "build": {
-    "env": {
-      "NODE_ENV": "production"
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
+  ],
+  "env": {
+    "NODE_ENV": "production"
   }
 }
