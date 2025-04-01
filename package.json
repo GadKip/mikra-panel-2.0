@@ -13,7 +13,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "build": "expo export",
+    "build": "NODE_ENV=production expo export",
     "dev": "expo start",
     "test": "jest"
   },
@@ -78,7 +78,8 @@
   "resolutions": {
     "typescript": "4.9.5",
     "react-native": "0.76.8",
-    "react-native-screens": "~4.4.0"
+    "react-native-screens": "~4.4.0",
+    "lightningcss": "1.22.1"
   },
   "private": true,
   "repository": "https://github.com/GadKip/mikra-panel-2.0.git",

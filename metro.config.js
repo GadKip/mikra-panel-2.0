@@ -1,8 +1,14 @@
 // Learn more https://docs.expo.io/guides/customizing-metro
 const { getDefaultConfig } = require('expo/metro-config');
-const { withNativeWind } = require("nativewind/metro");
 
 /** @type {import('expo/metro-config').MetroConfig} */
 const config = getDefaultConfig(__dirname);
 
-module.exports = withNativeWind(config, { input: "./global.css" });
+// Use a simpler configuration for production builds
+if (process.env.NODE_ENV === 'production') {
+  module.exports = config;
+} else {
+  // Use NativeWind only in development
+  const { withNativeWind } = require("nativewind/metro");
+  module.exports = withNativeWind(config, { input: "./global.css" });
+}
