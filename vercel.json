@@ -2,7 +2,7 @@
   "version": 2,
   "buildCommand": "npm run build",
   "outputDirectory": "web-build",
-  "framework": "remix",
+  "framework": "react",
   "builds": [
     {
       "src": "package.json",
@@ -11,8 +11,22 @@
   ],
   "routes": [
     {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/assets/(.*)",
+      "headers": { "cache-control": "public, max-age=31536000, immutable" }
+    },
+    {
+      "src": "/(.+\\.(?:png|jpg|ico|css|mp3|js|gif)(?:\\?.*)?$)",
+      "headers": { "cache-control": "public, max-age=31536000, immutable" }
+    },
+    {
       "src": "/(.*)",
-      "dest": "/index.html"
+      "dest": "/index.html",
+      "headers": {
+        "cache-control": "public, max-age=0, must-revalidate"
+      }
     }
   ],
   "env": {
