@@ -132,9 +132,10 @@ const Upload = () => {
                     placeholder="בחר קטגוריה"
                     handleChangeText={(e) => handleChange('category', e)}
                     items={[
+                        { label: 'הקדמה והסכמות', value: 'הקדמה והסכמות' },
                         { label: 'תורה', value: 'תורה' },
                         { label: 'נביאים', value: 'נביאים' },
-                        { label: 'כתובים', value: 'כתובים' },
+                        { label: 'כתובים', value: 'כתובים' }
                     ]}
                     otherStyles="mt-7"
                 />
