@@ -1,6 +1,6 @@
 import { View, SafeAreaView } from 'react-native';
 import { SplashScreen, Stack } from 'expo-router';
-import React from 'react';
+import React, { useEffect } from 'react';
 import "../global.css";
 import { StatusBar } from 'expo-status-bar';
 import { GlobalProvider } from "../context/GlobalProvider";
@@ -21,6 +21,11 @@ SplashScreen.preventAutoHideAsync();
 const LayoutContent = () => {
   const { isDark } = useTheme();
   
+  useEffect(() => {
+    // Hide splash screen after fonts are loaded
+    SplashScreen.hideAsync();
+  }, []);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <RTLProvider>
