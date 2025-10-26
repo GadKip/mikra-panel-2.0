@@ -9,7 +9,9 @@ import {
     deleteFile, 
     updateFile, 
     deleteMultipleFiles,
-    reorderEpisode
+    reorderEpisode,
+    updateAllDocumentsOrder,
+    reuploadAllProblematicFiles
 } from '../lib/appwrite';
 import CustomButton from '../components/CustomButton';
 import Loader from '../components/Loader';
@@ -30,7 +32,7 @@ const Browse = () => {
     const [selectedEpisodes, setSelectedEpisodes] = useState([]);
     const [expandedCategories, setExpandedCategories] = useState({});
     const [expandedBooks, setExpandedBooks] = useState({});
-    const [bookSelection, setBookSelection] = useState({}); // Track book-level selection
+    const [bookSelection, setBookSelection] = useState({}); // Add this line
 
     // Hooks
     const { withLoading, isLoading } = useLoadingState();
@@ -120,74 +122,62 @@ const Browse = () => {
         }
     };
 
-    const handleReorder = async (episode, newOrder) => {
-        try {
-            const orderValue = parseFloat(newOrder);
-            if (isNaN(orderValue)) {
-                throw new Error("Invalid order value");
+const handleReorder = async (episode, direction) => {
+    try {
+        const bookEpisodes = Object.values(books[episode.category][episode.book]);
+        const sortedEpisodes = bookEpisodes.sort((a, b) => Number(a.episodeOrder) - Number(b.episodeOrder));
+        const currentIndex = sortedEpisodes.findIndex(ep => ep.$id === episode.$id);
+        
+        // Calculate target index
+        const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+        
+        // Check if move is possible
+        if (targetIndex < 0 || targetIndex >= sortedEpisodes.length) {
+            return;
+        }
+
+        // Calculate new order
+        const INCREMENT = 1000;
+        let newOrder;
+        
+        if (targetIndex === 0) {
+            // Moving to first position
+            newOrder = Math.floor(sortedEpisodes[0].episodeOrder - INCREMENT);
+        } else if (targetIndex === sortedEpisodes.length - 1) {
+            // Moving to last position
+            newOrder = Math.floor(sortedEpisodes[sortedEpisodes.length - 1].episodeOrder + INCREMENT);
+        } else {
+            // Moving between items
+            const prevOrder = Number(sortedEpisodes[targetIndex - 1].episodeOrder);
+            const nextOrder = Number(sortedEpisodes[targetIndex].episodeOrder);
+            newOrder = Math.floor(prevOrder + (nextOrder - prevOrder) / 2);
+        }
+
+        // Optimistically update UI first
+        const updatedEpisodes = [...sortedEpisodes];
+        const [movedEpisode] = updatedEpisodes.splice(currentIndex, 1);
+        updatedEpisodes.splice(targetIndex, 0, { ...movedEpisode, episodeOrder: newOrder });
+
+        // Update local state immediately without collapsing
+        setBooks(prev => ({
+            ...prev,
+            [episode.category]: {
+                ...prev[episode.category],
+                [episode.book]: updatedEpisodes
             }
-            
-            await withLoading(async () => {
-                await reorderEpisode(episode.$id, orderValue, client);
-                await fetchBooks();
-            });
-            
-            customAlert('הצלחה', 'סדר הפרקים עודכן בהצלחה');
-        } catch (error) {
-            handleError(error, {
-                title: 'שגיאה בסידור פרקים',
-                fallbackMessage: 'לא ניתן לעדכן את סדר הפרקים'
-            });
-        }
-    };
+        }));
 
-    const handleMoveUp = async (episode) => {
-        try {
-            const bookEpisodes = Object.values(books[episode.category][episode.book]);
-            const sortedEpisodes = bookEpisodes.sort((a, b) => Number(a.episodeOrder) - Number(b.episodeOrder));
-            
-            const currentIndex = sortedEpisodes.findIndex(ep => ep.$id === episode.$id);
-            if (currentIndex <= 0) return;
-            
-            const prevEpisode = sortedEpisodes[currentIndex - 1];
-            const newOrder = Number(prevEpisode.episodeOrder);
-            const prevOrder = newOrder - 1;
+        // Silent backend update without loading state
+        await reorderEpisode(episode.$id, newOrder, client);
+    } catch (error) {
+        console.error('Reorder error:', error);
+        // Refresh the list only if there's an error
+        await fetchBooks();
+    }
+};
 
-            await withLoading(async () => {
-                await reorderEpisode(prevEpisode.$id, prevOrder, client);
-                await reorderEpisode(episode.$id, newOrder, client);
-                await fetchBooks();
-            });
-
-            customAlert('הצלחה', 'סדר הפרקים עודכן בהצלחה');
-        } catch (error) {
-            handleError(error);
-        }
-    };
-
-    const handleMoveDown = async (episode) => {
-        try {
-            const bookEpisodes = Object.values(books[episode.category][episode.book]);
-            const sortedEpisodes = bookEpisodes.sort((a, b) => Number(a.episodeOrder) - Number(b.episodeOrder));
-            
-            const currentIndex = sortedEpisodes.findIndex(ep => ep.$id === episode.$id);
-            if (currentIndex >= sortedEpisodes.length - 1) return;
-            
-            const nextEpisode = sortedEpisodes[currentIndex + 1];
-            const newOrder = Number(nextEpisode.episodeOrder);
-            const nextOrder = newOrder + 1;
-
-            await withLoading(async () => {
-                await reorderEpisode(nextEpisode.$id, nextOrder, client);
-                await reorderEpisode(episode.$id, newOrder, client);
-                await fetchBooks();
-            });
-            
-            customAlert('הצלחה', 'סדר הפרקים עודכן בהצלחה');
-        } catch (error) {
-            handleError(error);
-        }
-    };
+const handleMoveUp = (episode) => handleReorder(episode, 'up');
+const handleMoveDown = (episode) => handleReorder(episode, 'down');
 
     const toggleEpisodeSelection = (episode) => {
         setSelectedEpisodes(prev => 
@@ -254,6 +244,25 @@ const Browse = () => {
             setSelectedEpisodes(prev =>
                 prev.filter(episode => !episodes.some(e => e.$id === episode.$id))
             );
+        }
+    };
+
+    const handleUpdateAllOrders = async () => {
+        try {
+            await withLoading(async () => {
+                // Use the new reupload function instead
+                const result = await reuploadAllProblematicFiles(client);
+                customAlert(
+                    'הצלחה',
+                    `הועלו מחדש ${result.updated} מתוך ${result.total} קבצים. ${result.failed} נכשלו.`
+                );
+                await fetchBooks(); // Refresh the list
+            });
+        } catch (error) {
+            handleError(error, {
+                title: 'שגיאה בעדכון קבצים',
+                fallbackMessage: 'לא ניתן לעדכן את הקבצים'
+            });
         }
     };
 
@@ -334,6 +343,13 @@ const Browse = () => {
                         />
                     </View>
                 )}
+                {selectedEpisodes.length === 0 /**&& (
+                    <CustomButton
+                        title="עדכן סדר קבצים"
+                        handlePress={handleUpdateAllOrders}
+                        containerStyles="bg-primary"
+                    />
+                )**/}
             </ScrollView>
             <EditModal
                 isVisible={!!editingEpisode}

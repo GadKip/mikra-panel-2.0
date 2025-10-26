@@ -2,6 +2,7 @@ import { View, TouchableOpacity, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import ThemedText from './ThemedText';
+import { memo, useCallback } from 'react';
 
 /**
  * @typedef {Object} EpisodeListItemProps
@@ -23,6 +24,15 @@ const EpisodeListItem = ({
 }) => {
     const { isDark } = useTheme();
     
+    // Add memoization to prevent unnecessary re-renders
+    const handleMoveUp = useCallback(() => {
+        onMoveUp(episode);
+    }, [episode, onMoveUp]);
+
+    const handleMoveDown = useCallback(() => {
+        onMoveDown(episode);
+    }, [episode, onMoveDown]);
+
     return (
         <View className={`flex-row justify-between items-center ${isDark ? 'bg-surface-dark' : 'bg-surface-light'} rounded-lg mb-2 p-3`}>
             <View className="flex-row gap-2 items-center">
@@ -38,7 +48,7 @@ const EpisodeListItem = ({
                 </TouchableOpacity>
                 <View className="flex-row gap-1">
                     <TouchableOpacity
-                        onPress={() => onMoveUp(episode)}
+                        onPress={handleMoveUp}
                         className="bg-gray-600 p-1 rounded">
                         <Ionicons 
                             name="chevron-up" 
@@ -47,7 +57,7 @@ const EpisodeListItem = ({
                         />
                     </TouchableOpacity>
                     <TouchableOpacity
-                        onPress={() => onMoveDown(episode)}
+                        onPress={handleMoveDown}
                         className="bg-gray-600 p-1 rounded">
                         <Ionicons 
                             name="chevron-down" 
@@ -75,4 +85,4 @@ const EpisodeListItem = ({
     );
 };
 
-export default EpisodeListItem;
+export default memo(EpisodeListItem); // Add memo to prevent unnecessary re-renders
