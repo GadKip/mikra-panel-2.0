@@ -12,7 +12,7 @@ import {
     reorderEpisode,
     updateAllDocumentsOrder,
     reuploadAllProblematicFiles
-} from '../lib/appwrite';
+} from '../lib/firebase';
 import CustomButton from '../components/CustomButton';
 import Loader from '../components/Loader';
 import { useCustomAlert } from '../lib/utils';
@@ -49,14 +49,9 @@ const Browse = () => {
 
     // Data fetching
     const fetchBooks = async () => {
-        if (!client) {
-            console.error("No client available");
-            return;
-        }
-
         try {
             await withLoading(async () => {
-                const files = await listFiles(client);
+                const files = await listFiles();
                 setBooks(files);
 
                 // Initialize expandedCategories and expandedBooks to false
@@ -91,7 +86,7 @@ const Browse = () => {
             'האם אתה בטוח שברצונך למחוק פרק זה?',
             async () => {
                 try {
-                    await deleteFile(episode.fileId, episode.$id, client);
+                    await deleteFile(episode.$id);
                     await fetchBooks();
                     customAlert('הצלחה', 'הפרק נמחק בהצלחה');
                 } catch (error) {
@@ -110,7 +105,7 @@ const Browse = () => {
 
     const handleEdit = async (formData) => {
         try {
-            await updateFile(editingEpisode.$id, editingEpisode.fileId, formData, client);
+            await updateFile(editingEpisode.$id, formData);
             await fetchBooks();
             customAlert('הצלחה', 'הפרק עודכן בהצלחה');
         } catch (error) {
@@ -168,7 +163,7 @@ const handleReorder = async (episode, direction) => {
         }));
 
         // Silent backend update without loading state
-        await reorderEpisode(episode.$id, newOrder, client);
+        await reorderEpisode(episode.$id, newOrder);
     } catch (error) {
         console.error('Reorder error:', error);
         // Refresh the list only if there's an error
@@ -196,7 +191,7 @@ const handleMoveDown = (episode) => handleReorder(episode, 'down');
             async () => {
                 try {
                     await withLoading(async () => {
-                        await deleteMultipleFiles(selectedEpisodes, client);
+                        await deleteMultipleFiles(selectedEpisodes);
                     });
                     
                     await fetchBooks();
@@ -251,7 +246,7 @@ const handleMoveDown = (episode) => handleReorder(episode, 'down');
         try {
             await withLoading(async () => {
                 // Use the new reupload function instead
-                const result = await reuploadAllProblematicFiles(client);
+                const result = await reuploadAllProblematicFiles();
                 customAlert(
                     'הצלחה',
                     `הועלו מחדש ${result.updated} מתוך ${result.total} קבצים. ${result.failed} נכשלו.`

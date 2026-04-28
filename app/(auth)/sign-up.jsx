@@ -6,14 +6,14 @@ import "../../global.css";
 import images from '../../constants/images';
 import FormField from '../../components/FormField';
 import { useState } from 'react';
-import { createUser } from '../../lib/appwrite';
+import { createUser } from '../../lib/firebase';
 import { useGlobalContext } from "../../context/GlobalProvider";
 import alert from "../../components/alert";
 import Loader from '../../components/Loader'; // Import Loader
 import { useTheme } from '../../context/ThemeContext'; // Import useTheme
 
 export default function SignUp() {
-  const { setUser, setLoggedIn, client, loading, setLoading } = useGlobalContext(); // Get setLoading
+  const { setUser, setLoggedIn, loading } = useGlobalContext(); // Get loading state
   const { isDark } = useTheme(); // Use useTheme
   const [isSubmitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
@@ -29,9 +29,8 @@ export default function SignUp() {
             return;
         }
         setSubmitting(true);
-        setLoading(true); // Set loading to true
         try {
-            const result = await createUser(form.email, form.password, form.username, client);
+            const result = await createUser(form.email, form.password, form.username);
             setUser(result);
             setLoggedIn(true);
             router.replace('/upload');
@@ -39,7 +38,6 @@ export default function SignUp() {
             alert('Error', error.message);
         } finally {
             setSubmitting(false);
-              setLoading(false); // Set loading to false
         }
     };
 

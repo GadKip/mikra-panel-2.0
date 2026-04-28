@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View } from 'react-native';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
-import { Databases } from 'appwrite';
 import DraggableFlatList from 'react-native-draggable-flatlist';
 import EpisodeListItem from './EpisodeListItem';
 import Loader from './Loader';
 import { useTheme } from '../context/ThemeContext';
-import { reorderEpisode } from '../lib/appwrite';
+import { reorderEpisode } from '../lib/firebase';
 
 export default function DraggableEpisodeList({ 
     episodes, 
@@ -41,7 +40,7 @@ export default function DraggableEpisodeList({
             const newOrder = calculateNewOrder(updatedEpisodes, destIndex);
             
             // Silent backend update - no alerts
-            await reorderEpisode(databases, reorderedItem.$id, newOrder);
+            await reorderEpisode(reorderedItem.$id, newOrder);
         } catch (error) {
             console.error('Error reordering:', error);
             // Only show error in console, don't alert

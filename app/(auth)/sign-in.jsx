@@ -7,7 +7,7 @@ import "../../global.css";
 import images from '../../constants/images';
 import FormField from '../../components/FormField';
 import { useState } from 'react';
-import { signIn } from '../../lib/appwrite';
+import { signIn, signInWithGoogle } from '../../lib/firebase';
 import { useGlobalContext } from "../../context/GlobalProvider";
 import Loader from '../../components/Loader'; // Import Loader
 import { useLoadingState } from '../../hooks/useLoadingState';
@@ -20,7 +20,7 @@ export default function SignIn() {
   const { withLoading, isLoading } = useLoadingState();
   const { getResponsiveValue } = useResponsive();
   const handleError = useErrorHandler();
-  const { setUser, setLoggedIn, client } = useGlobalContext();
+  const { setUser, setLoggedIn } = useGlobalContext();
   const router = useRouter();
   const [form, setForm] = useState({ email: '', password: '' });
   const { isDark } = useTheme();
@@ -35,7 +35,7 @@ export default function SignIn() {
 
     await withLoading(async () => {
       try {
-        const result = await signIn(form.email, form.password, client);
+        const result = await signIn(form.email, form.password);
         setUser(result);
         setLoggedIn(true);
         router.replace('/upload');
@@ -43,6 +43,22 @@ export default function SignIn() {
         handleError(error, {
           title: 'שגיאת התחברות',
           fallbackMessage: 'לא ניתן להתחבר, אנא נסה שוב'
+        });
+      }
+    }, true);
+  };
+
+  const submitGoogleSignIn = async () => {
+    await withLoading(async () => {
+      try {
+        const result = await signInWithGoogle();
+        setUser(result);
+        setLoggedIn(true);
+        router.replace('/upload');
+      } catch (error) {
+        handleError(error, {
+          title: 'שגיאת התחברות עם Google',
+          fallbackMessage: 'לא ניתן להתחבר עם Google, אנא נסה שוב'
         });
       }
     }, true);
@@ -85,6 +101,31 @@ export default function SignIn() {
             containerStyles="mt-7"
             isLoading={isLoading}
           />
+          
+          <View className="flex-row items-center my-6 w-full">
+            <View className={`flex-1 h-px ${isDark ? 'bg-surface-dark' : 'bg-surface-light'}`} />
+            <ThemedText className="px-3 text-base">או</ThemedText>
+            <View className={`flex-1 h-px ${isDark ? 'bg-surface-dark' : 'bg-surface-light'}`} />
+          </View>
+
+          <View className={`w-full px-4 py-3 rounded-lg flex-row items-center justify-center border-2 ${
+            isDark 
+              ? 'bg-surface-dark border-text-dark' 
+              : 'bg-white border-text-light'
+          }`}>
+            <Image 
+              source={{ uri: 'https://www.gstatic.com/firebasejs/ui/2.0.0/images/google.svg' }} 
+              style={{ width: 20, height: 20 }}
+              className="mr-2"
+            />
+            <CustomButton 
+              title="התחבר עם Google"
+              handlePress={submitGoogleSignIn}
+              containerStyles="flex-1"
+              isLoading={isLoading}
+              textStyles="text-base"
+            />
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>

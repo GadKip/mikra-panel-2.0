@@ -4,7 +4,7 @@ import CustomButton from '../components/CustomButton';
 import FormField from '../components/FormField';
 import { useGlobalContext } from '../context/GlobalProvider';
 import { useRouter, Redirect } from 'expo-router';
-import { upload, getUserSession, signOut } from '../lib/appwrite';
+import { upload, getUserSession, signOut } from '../lib/firebase';
 import Dropdown from '../components/Dropdown';
 import booksData from '../constants/booksData.json';
 import ChooseFile from '../components/ChooseFile';
@@ -29,8 +29,8 @@ const Upload = () => {
     const { isDark } = useTheme();
 
     useEffect(() => {
-        if (!user && client) {
-            getUserSession(client).then(sessionUser => {
+        if (!user) {
+            getUserSession().then(sessionUser => {
                 if (!sessionUser) {
                     router.replace('/sign-in');
                 } else {
@@ -41,17 +41,13 @@ const Upload = () => {
                 router.replace('/sign-in');
             });
         }
-    }, [user, setUser, client]);
+    }, [user, setUser]);
 
     const handleLogout = async () => {
         try {
-            if (client) {
-                await signOut(client);
-                showAlert('התנתקת בהצלחה!');
-                router.replace('/');
-            } else {
-                throw new Error('No valid client to handle signOut.');
-            }
+            await signOut();
+            showAlert('התנתקת בהצלחה!');
+            router.replace('/');
         } catch (error) {
             showAlert('Error', error.message);
         }
@@ -87,13 +83,12 @@ const Upload = () => {
                 const fileBlob = await fetch(selectedFile.uri).then(r => r.blob());
                 const updatedFile = { ...selectedFile, fileBlob };
                 
-                if (client && user) {
+                if (user) {
                     await upload(
                         form.category,
                         form.book,
                         form.episode,
                         updatedFile,
-                        client,
                         user.$id
                     );
                     showAlert("הצלחנו", "הקובץ עלה בהצלחה!");
@@ -103,7 +98,7 @@ const Upload = () => {
                     setSelectedFile(null);
                     setBooks([]);
                 } else {
-                    throw new Error('No valid client to handle upload.');
+                    throw new Error('No valid user to handle upload.');
                 }
             } catch (error) {
                 handleUploadFileError(error);
