@@ -266,12 +266,12 @@ const handleMoveDown = (episode) => handleReorder(episode, 'down');
         <View>
             {episodes.map(episode => (
                 <EpisodeListItem
-                    key={episode.$id}
+                    key={episode.id}
                     episode={episode}
                     onDelete={handleDelete}
                     onEdit={setEditingEpisode}
                     onToggleSelection={toggleEpisodeSelection}
-                    isSelected={selectedEpisodes.some(selected => selected.$id === episode.$id)}
+                    isSelected={selectedEpisodes.some(selected => selected.id === episode.id)}
                     onMoveUp={handleMoveUp}
                     onMoveDown={handleMoveDown}
                 />

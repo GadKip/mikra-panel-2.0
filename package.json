@@ -1,6 +1,6 @@
 {
   "name": "mikra-panel-2.0",
-  "version": "1.0.0",
+  "version": "2.2.0",
   "main": "expo-router/entry",
   "licenses": [
     {
@@ -26,9 +26,10 @@
     "@remix-run/server-runtime": "^2.15.0",
     "@vercel/analytics": "^1.4.1",
     "@xmldom/xmldom": "^0.9.0",
-    "appwrite": "^16.0.2",
+    "appwrite": "^25.0.0",
     "cheerio": "^1.0.0",
     "cookie": "^0.7.0",
+    "csv-parser": "^3.2.0",
     "expo": "~52.0.29",
     "expo-constants": "~17.0.5",
     "expo-document-picker": "~13.0.2",
@@ -37,6 +38,8 @@
     "expo-router": "~4.0.17",
     "expo-status-bar": "~2.0.1",
     "firebase": "^12.12.1",
+    "firebase-admin": "^13.8.0",
+    "iconv-lite": "^0.7.2",
     "jsdom": "^26.0.0",
     "jszip": "^3.10.1",
     "mammoth": "^1.9.0",
@@ -49,6 +52,7 @@
     "metro-source-map": "^0.81.0",
     "metro-transform-plugins": "^0.81.0",
     "nativewind": "^4.1.23",
+    "node-appwrite": "^24.0.0",
     "nth-check": "^2.0.1",
     "postcss": "^8.4.31",
     "react": "18.3.1",

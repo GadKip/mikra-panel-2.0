@@ -72,7 +72,7 @@ const EpisodeListItem = ({
                     onPress={() => onToggleSelection(episode)}
                     className="flex-row items-center gap-2">
                     <ThemedText className="text-lg">
-                        {episode.episode}
+                        {episode.title}
                     </ThemedText>
                     <Ionicons
                         name={isSelected ? "checkbox-outline" : "square-outline"}

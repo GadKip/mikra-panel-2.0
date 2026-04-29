@@ -34,3 +34,6 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 .vercel
+
+# service account keys
+serviceAccountKey.json
