@@ -20,7 +20,8 @@ const EpisodeListItem = ({
     onToggleSelection, 
     isSelected,
     onMoveUp,
-    onMoveDown 
+    onMoveDown,
+    isReordering
 }) => {
     const { isDark } = useTheme();
     
@@ -49,7 +50,8 @@ const EpisodeListItem = ({
                 <View className="flex-row gap-1">
                     <TouchableOpacity
                         onPress={handleMoveUp}
-                        className="bg-gray-600 p-1 rounded">
+                        disabled={isReordering}
+                        className={`bg-gray-600 p-1 rounded ${isReordering ? 'opacity-50' : ''}`}>
                         <Ionicons 
                             name="chevron-up" 
                             size={20} 
@@ -58,7 +60,8 @@ const EpisodeListItem = ({
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={handleMoveDown}
-                        className="bg-gray-600 p-1 rounded">
+                        disabled={isReordering}
+                        className={`bg-gray-600 p-1 rounded ${isReordering ? 'opacity-50' : ''}`}>
                         <Ionicons 
                             name="chevron-down" 
                             size={20} 

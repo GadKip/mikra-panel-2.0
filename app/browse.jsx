@@ -32,7 +32,8 @@ const Browse = () => {
     const [selectedEpisodes, setSelectedEpisodes] = useState([]);
     const [expandedCategories, setExpandedCategories] = useState({});
     const [expandedBooks, setExpandedBooks] = useState({});
-    const [bookSelection, setBookSelection] = useState({}); // Add this line
+    const [bookSelection, setBookSelection] = useState({});
+    const [reorderingId, setReorderingId] = useState(null); // Track which episode is being reordered
 
     // Hooks
     const { withLoading, isLoading } = useLoadingState();
@@ -118,40 +119,63 @@ const Browse = () => {
     };
 
 const handleReorder = async (episode, direction) => {
+    // Prevent multiple simultaneous reorders
+    if (reorderingId) {
+        return;
+    }
+
     try {
-        const bookEpisodes = Object.values(books[episode.category][episode.book]);
-        const sortedEpisodes = bookEpisodes.sort((a, b) => Number(a.episodeOrder) - Number(b.episodeOrder));
-        const currentIndex = sortedEpisodes.findIndex(ep => ep.$id === episode.$id);
-        
-        // Calculate target index
-        const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-        
-        // Check if move is possible
-        if (targetIndex < 0 || targetIndex >= sortedEpisodes.length) {
-            return;
-        }
+        // Mark this episode as reordering
+        setReorderingId(episode.$id);
 
-        // Perform simple array swap
-        const updatedEpisodes = [...sortedEpisodes];
-        [updatedEpisodes[currentIndex], updatedEpisodes[targetIndex]] = [
-            updatedEpisodes[targetIndex],
-            updatedEpisodes[currentIndex]
-        ];
-
-        // Update local state immediately
-        setBooks(prev => ({
-            ...prev,
-            [episode.category]: {
-                ...prev[episode.category],
-                [episode.book]: updatedEpisodes
+        // Always work with the most current state using functional update
+        setBooks(prevBooks => {
+            const bookEpisodes = Object.values(prevBooks[episode.category][episode.book]);
+            const sortedEpisodes = bookEpisodes.sort((a, b) => Number(a.episodeOrder) - Number(b.episodeOrder));
+            const currentIndex = sortedEpisodes.findIndex(ep => ep.$id === episode.$id);
+            
+            // Calculate target index
+            const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+            
+            // Check if move is possible
+            if (targetIndex < 0 || targetIndex >= sortedEpisodes.length) {
+                setReorderingId(null);
+                return prevBooks;
             }
-        }));
 
-        // Batch update backend with all reordered episodes
-        // The function will re-index them as 1, 2, 3, etc.
-        await reorderEpisodes(updatedEpisodes);
+            // Perform simple array swap
+            const updatedEpisodes = [...sortedEpisodes];
+            [updatedEpisodes[currentIndex], updatedEpisodes[targetIndex]] = [
+                updatedEpisodes[targetIndex],
+                updatedEpisodes[currentIndex]
+            ];
+
+            // Trigger backend update after state is updated
+            Promise.resolve().then(() => {
+                reorderEpisodes(updatedEpisodes)
+                    .catch(error => {
+                        console.error('Reorder error:', error);
+                        // Refresh the list only if there's an error
+                        fetchBooks();
+                    })
+                    .finally(() => {
+                        // Clear reordering state after operation completes
+                        setReorderingId(null);
+                    });
+            });
+
+            // Return updated books state
+            return {
+                ...prevBooks,
+                [episode.category]: {
+                    ...prevBooks[episode.category],
+                    [episode.book]: updatedEpisodes
+                }
+            };
+        });
     } catch (error) {
         console.error('Reorder error:', error);
+        setReorderingId(null);
         // Refresh the list only if there's an error
         await fetchBooks();
     }
@@ -260,6 +284,7 @@ const handleMoveDown = (episode) => handleReorder(episode, 'down');
                     isSelected={selectedEpisodes.some(selected => selected.id === episode.id)}
                     onMoveUp={handleMoveUp}
                     onMoveDown={handleMoveDown}
+                    isReordering={reorderingId === episode.id}
                 />
             ))}
         </View>
