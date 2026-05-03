@@ -5,7 +5,7 @@ import DraggableFlatList from 'react-native-draggable-flatlist';
 import EpisodeListItem from './EpisodeListItem';
 import Loader from './Loader';
 import { useTheme } from '../context/ThemeContext';
-import { reorderEpisode } from '../lib/firebase';
+import { reorderEpisodes } from '../lib/firebase';
 
 export default function DraggableEpisodeList({ 
     episodes, 
@@ -39,8 +39,11 @@ export default function DraggableEpisodeList({
             // Calculate new order using one of the approaches above
             const newOrder = calculateNewOrder(updatedEpisodes, destIndex);
             
-            // Silent backend update - no alerts
-            await reorderEpisode(reorderedItem.$id, newOrder);
+            // Update the reordered item's episodeOrder
+            reorderedItem.episodeOrder = newOrder;
+            
+            // Batch update backend with all reordered episodes
+            await reorderEpisodes(updatedEpisodes);
         } catch (error) {
             console.error('Error reordering:', error);
             // Only show error in console, don't alert

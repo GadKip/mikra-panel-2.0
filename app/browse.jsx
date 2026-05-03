@@ -9,7 +9,7 @@ import {
     deleteFile, 
     updateFile, 
     deleteMultipleFiles,
-    reorderEpisode,
+    reorderEpisodes,
     updateAllDocumentsOrder,
     reuploadAllProblematicFiles
 } from '../lib/firebase';
@@ -162,8 +162,8 @@ const handleReorder = async (episode, direction) => {
             }
         }));
 
-        // Silent backend update without loading state
-        await reorderEpisode(episode.$id, newOrder);
+        // Batch update backend with all reordered episodes
+        await reorderEpisodes(updatedEpisodes);
     } catch (error) {
         console.error('Reorder error:', error);
         // Refresh the list only if there's an error
