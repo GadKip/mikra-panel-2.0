@@ -131,29 +131,14 @@ const handleReorder = async (episode, direction) => {
             return;
         }
 
-        // Calculate new order
-        const INCREMENT = 1000;
-        let newOrder;
-        
-        if (targetIndex === 0) {
-            // Moving to first position
-            newOrder = Math.floor(sortedEpisodes[0].episodeOrder - INCREMENT);
-        } else if (targetIndex === sortedEpisodes.length - 1) {
-            // Moving to last position
-            newOrder = Math.floor(sortedEpisodes[sortedEpisodes.length - 1].episodeOrder + INCREMENT);
-        } else {
-            // Moving between items
-            const prevOrder = Number(sortedEpisodes[targetIndex - 1].episodeOrder);
-            const nextOrder = Number(sortedEpisodes[targetIndex].episodeOrder);
-            newOrder = Math.floor(prevOrder + (nextOrder - prevOrder) / 2);
-        }
-
-        // Optimistically update UI first
+        // Perform simple array swap
         const updatedEpisodes = [...sortedEpisodes];
-        const [movedEpisode] = updatedEpisodes.splice(currentIndex, 1);
-        updatedEpisodes.splice(targetIndex, 0, { ...movedEpisode, episodeOrder: newOrder });
+        [updatedEpisodes[currentIndex], updatedEpisodes[targetIndex]] = [
+            updatedEpisodes[targetIndex],
+            updatedEpisodes[currentIndex]
+        ];
 
-        // Update local state immediately without collapsing
+        // Update local state immediately
         setBooks(prev => ({
             ...prev,
             [episode.category]: {
@@ -163,6 +148,7 @@ const handleReorder = async (episode, direction) => {
         }));
 
         // Batch update backend with all reordered episodes
+        // The function will re-index them as 1, 2, 3, etc.
         await reorderEpisodes(updatedEpisodes);
     } catch (error) {
         console.error('Reorder error:', error);

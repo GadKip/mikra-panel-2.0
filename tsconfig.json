@@ -12,7 +12,7 @@
     "**/*.js",
     "**/*.jsx",
     "nativewind-env.d.ts"
-  ],
+, "lib/appwrite.js.old"  ],
   "exclude": [
     "node_modules"
   ]
