@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Pressable, TouchableOpacity } from 'react-native';
+import { View, ScrollView, Pressable, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
@@ -10,7 +10,6 @@ import {
     updateFile, 
     deleteMultipleFiles,
     reorderEpisodes,
-    reuploadAllProblematicFiles
 } from '../lib/firebase';
 import CustomButton from '../components/CustomButton';
 import Loader from '../components/Loader';
@@ -290,7 +289,9 @@ const Browse = () => {
                     <Ionicons 
                         name={expandedBooks[bookName] ? "chevron-down" : "chevron-back"} 
                         size={20} 
-                        color="white"/>
+                        // Changed hardcoded 'white' to responsive slate for light mode visibility
+                        color={isDark ? "#ffffff" : "#1e293b"} 
+                    />
                 </Pressable>
                 <TouchableOpacity
                     onPress={() => toggleBookSelection(bookName, episodes)}
@@ -310,7 +311,10 @@ const Browse = () => {
         <SafeAreaView className={`flex-1 ${isDark ? 'bg-background-dark' : 'bg-background-light'}`}>
             <Loader isLoading={isLoading}/>
             <Header currentPage="browse"/>
-            <ScrollView className="flex-1 p-4">
+            <ScrollView 
+                className="flex-1"
+                contentContainerStyle={{ padding: 16, paddingBottom: 80, flexGrow: 1 }}
+            >
                 {Object.entries(books).map(([category, categoryBooks]) => (
                     <View key={category} className={`mb-8 ${isDark ? 'bg-surface-dark' : 'bg-surface-light'} rounded-lg p-4`}>
                         <Pressable 

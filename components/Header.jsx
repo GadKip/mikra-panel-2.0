@@ -12,22 +12,28 @@ export default function Header({ currentPage }) {
   const { isDark } = useTheme();
 
   return (
-    <View className={`flex-row justify-between items-center px-4 py-3 ${isDark ? 'bg-surface-dark' : 'bg-surface-light'}`}>
-      <View className="flex-row space-x-4 items-center">
+    <View className={`flex-row justify-between items-center px-4 py-3 ${isDark ? 'bg-surface-dark' : 'bg-surface-light'} border-b ${isDark ? 'border-neutral-800' : 'border-neutral-200'}`}>
+      <View className="flex-row items-center gap-3">
         <ThemeToggle />
         <CustomButton
           title={currentPage === 'upload' ? 'רשימת קבצים' : 'העלאת קבצים'}
           handlePress={() => router.replace(currentPage === 'upload' ? '/browse' : '/upload')}
-          containerStyles="bg-primary px-4"
+          containerStyles="px-4 h-10 min-w-0" 
+          textStyles="text-lg"
         />
       </View>
-      <ThemedText className="text-2xl">
-        {currentPage === 'upload' ? 'רשימת קבצים' : 'העלאת קבצים'}
+      
+      {/* Center title text restored */}
+      <ThemedText className="text-2xl font-bold">
+        {currentPage === 'upload' ? 'העלאת קבצים' : 'רשימת קבצים'}
       </ThemedText>
+
       <CustomButton 
         title="התנתק" 
         handlePress={() => router.replace('/signed-out')}
-        containerStyles="bg-red-600 px-4" 
+        // Changed back to highly compatible bg-red-600 to ensure solid red in both themes
+        containerStyles="bg-red-600 px-4 h-10 min-w-0" 
+        textStyles="text-lg"
       />
     </View>
   );

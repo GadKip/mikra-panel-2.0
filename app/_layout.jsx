@@ -1,4 +1,4 @@
-import { View, SafeAreaView } from 'react-native';
+import { View } from 'react-native';
 import { SplashScreen, Stack } from 'expo-router';
 import React, { useEffect } from 'react';
 import "../global.css";
@@ -31,14 +31,15 @@ const LayoutContent = () => {
       <RTLProvider>
         <AlertProvider>
           <ErrorBoundary>
-            <SafeAreaView className={`flex-1 ${isDark ? 'bg-background-dark' : 'bg-background-light'}`}>
+            {/* Swapped SafeAreaView for View to prevent double safe-zone nesting */}
+            <View className={`flex-1 ${isDark ? 'bg-background-dark' : 'bg-background-light'}`}>
               <Stack screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="index" options={{ headerShown: false }} />
                 <Stack.Screen name="upload" options={{ headerShown: false }} />
                 <Stack.Screen name="browse" options={{ headerShown: false }} />
                 <Stack.Screen name="(auth)/sign-in" />
               </Stack>
-            </SafeAreaView>
+            </View>
           </ErrorBoundary>
           <StatusBar style={isDark ? "light" : "dark"} />
         </AlertProvider>

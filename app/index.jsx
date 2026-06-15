@@ -18,14 +18,17 @@ export default function App() {
   if (!loading && loggedIn) return <Redirect href="./upload" />;
 
   return (
-    <SafeAreaView className={`h-full ${isDark ? 'bg-background-dark' : 'bg-background-light'}`}>
+    // Replaced h-full with flex-1 for layout scaling safety
+    <SafeAreaView className={`flex-1 ${isDark ? 'bg-background-dark' : 'bg-background-light'}`}>
       <Loader isLoading={loading} />
       <Text style={{display:"none"}}>{/* The fix is here */}</Text>
-      <ScrollView contentContainerStyle={{ height: '100%' }}>
-        <View className="w-full justify-center items-center px-4 my-6 flex-1">
+      {/* Changed height: 100% to flexGrow: 1 to ensure scrollability */}
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        {/* Removed flex-1 to prevent height lock inside ScrollView */}
+        <View className="w-full justify-center items-center px-4 my-6 py-6">
           <Image source={images.logo}
               resizeMode="contain"
-              className="flex-1 w-1/4"/>
+              className="flex-1 w-1/4 min-h-[150px]"/>
           <ThemedText className="flex-col justify-center text-4xl mt-7">
             Mikra Panel 2.0
           </ThemedText>
@@ -33,10 +36,10 @@ export default function App() {
             By Gadi K.
           </Text>
           <CustomButton 
-          title="לכניסה"
-          handlePress={() => router.replace('/sign-in')}
-          containerStyles="mt-7"
-          isDark={isDark}
+            title="לכניסה"
+            handlePress={() => router.replace('/sign-in')}
+            containerStyles="mt-7 w-full max-w-[300px]"
+            isDark={isDark}
           />
         </View>
       </ScrollView>

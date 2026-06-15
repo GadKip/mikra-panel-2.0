@@ -1,4 +1,4 @@
-import { Text, View, SafeAreaView, TouchableOpacity } from 'react-native';
+import { Text, View, TouchableOpacity, ScrollView } from 'react-native';
 import React, { useState, useCallback, useEffect } from 'react';
 import CustomButton from '../components/CustomButton';
 import FormField from '../components/FormField';
@@ -15,6 +15,7 @@ import Header from '../components/Header';
 import { useLoadingState } from '../hooks/useLoadingState';
 import { useTheme } from '../context/ThemeContext';
 import ThemedText from '../components/ThemedText';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Upload = () => {
     const { user, setUser, loggedIn } = useGlobalContext();
@@ -106,72 +107,78 @@ const Upload = () => {
         }, true);
     };
 
-    if (isLoading) return null;
-    if (!loggedIn && !isLoading) return <Redirect href='/' />;
+    if (!loggedIn) return <Redirect href='/' />;
 
     return (
         <SafeAreaView className={`flex-1 ${isDark ? 'bg-background-dark' : 'bg-background-light'}`}>
             <Loader isLoading={isLoading} />
             <Header currentPage="upload" />
-            <View className={getResponsiveValue({
-                mobile: 'w-full flex-1 items-center justify-center px-4 my-6',
-                tablet: 'w-4/5 flex-1 items-center justify-center mx-auto my-8',
-                desktop: 'w-3/5 flex-1 items-center justify-center mx-auto my-10'
-            })}>
-                <ThemedText className="text-center text-3xl">
-                    העלאת פרקים
-                </ThemedText>
-                <Dropdown
-                    title="תורה \ נביאים \ כתובים"
-                    value={form.category}
-                    placeholder="בחר קטגוריה"
-                    handleChangeText={(e) => handleChange('category', e)}
-                    items={[
-                        { label: 'הקדמה והסכמות', value: 'הקדמה והסכמות' },
-                        { label: 'תורה', value: 'תורה' },
-                        { label: 'נביאים', value: 'נביאים' },
-                        { label: 'כתובים', value: 'כתובים' }
-                    ]}
-                    otherStyles="mt-7"
-                />
-                <Dropdown
-                    title="ספר (ויקרא, שמואל...)"
-                    value={form.book}
-                    placeholder="בחר ספר"
-                    handleChangeText={(e) => handleChange('book', e)}
-                    items={books.map((book) => ({ 
-                        label: book.name, 
-                        value: book.name 
-                    }))}
-                    otherStyles="mt-7"
-                />
-                <FormField
-                    title="תת ספר (פרשה, פרק...)"
-                    value={form.episode}
-                    handleChangeText={(e) => handleChange('episode', e)}
-                    otherStyles="mt-7"
-                    isDark={isDark}
-                />
-                {selectedFile && (
-                    <View className={`flex-row items-center m-2.5 ${isDark ? 'bg-surface-dark' : 'bg-surface-light'} p-2 rounded-lg w-[280px]`}>
-                        <ThemedText className="text-base font-bold flex-1" numberOfLines={1} ellipsizeMode='middle'>
-                            File Selected: {selectedFile.name}
-                        </ThemedText>
-                        <TouchableOpacity onPress={handleClearFile}>
-                            <Text className={`text-xs ${isDark ? 'text-text-dark' : 'text-text-light'}`}>
-                                Clear
-                            </Text>
-                        </TouchableOpacity>
+            <ScrollView 
+                className="flex-1"
+                contentContainerStyle={{ padding: 16, paddingBottom: 80, flexGrow: 1 }}
+            >
+                <View className={getResponsiveValue({
+                    mobile: 'w-full items-center justify-center px-4 my-6',
+                    tablet: 'w-4/5 items-center justify-center mx-auto my-8',
+                    desktop: 'w-3/5 items-center justify-center mx-auto my-10'
+                })}>
+                    <Dropdown
+                        title="תורה \ נביאים \ כתובים"
+                        value={form.category}
+                        placeholder="בחר קטגוריה"
+                        handleChangeText={(e) => handleChange('category', e)}
+                        items={[
+                            { label: 'הקדמה והסכמות', value: 'הקדמה והסכמות' },
+                            { label: 'תורה', value: 'תורה' },
+                            { label: 'נביאים', value: 'נביאים' },
+                            { label: 'כתובים', value: 'כתובים' }
+                        ]}
+                        otherStyles="mt-7"
+                    />
+                    <Dropdown
+                        title="ספר (ויקרא, שמואל...)"
+                        value={form.book}
+                        placeholder="בחר ספר"
+                        handleChangeText={(e) => handleChange('book', e)}
+                        items={books.map((book) => ({ 
+                            label: book.name, 
+                            value: book.name 
+                        }))}
+                        otherStyles="mt-7"
+                    />
+                    <FormField
+                        title="תת ספר (פרשה, פרק...)"
+                        value={form.episode}
+                        handleChangeText={(e) => handleChange('episode', e)}
+                        otherStyles="mt-7"
+                        isDark={isDark}
+                    />
+                    {selectedFile && (
+                        <View className={`flex-row items-center m-2.5 ${isDark ? 'bg-surface-dark' : 'bg-surface-light'} p-2 rounded-lg w-[280px]`}>
+                            <ThemedText className="text-base font-bold flex-1" numberOfLines={1} ellipsizeMode='middle'>
+                                File Selected: {selectedFile.name}
+                            </ThemedText>
+                            <TouchableOpacity onPress={handleClearFile}>
+                                <Text className="text-xs text-red-500 font-semibold px-2">
+                                    Clear
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                    
+                    {/* Wrapped ChooseFile in a View container to guarantee consistent mt-7 vertical rhythm */}
+                    <View className="mt-7 w-full items-center">
+                        <ChooseFile onFileSelected={onFileSelected} />
                     </View>
-                )}
-                <ChooseFile onFileSelected={onFileSelected} />
-                <CustomButton
-                    title='העלה'
-                    containerStyles='mt-8'
-                    handlePress={submit}
-                    isLoading={isLoading}
-                />
-            </View>
+                    
+                    <CustomButton
+                        title='העלה'
+                        containerStyles='mt-8 w-full max-w-md' // Added max-w-md to match standard input widths
+                        handlePress={submit}
+                        isLoading={isLoading}
+                    />
+                </View>
+            </ScrollView>
         </SafeAreaView>
     );
 };

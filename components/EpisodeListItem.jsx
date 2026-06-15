@@ -1,17 +1,8 @@
-import { View, TouchableOpacity, Pressable } from 'react-native';
+import { View, TouchableOpacity, Pressable, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import ThemedText from './ThemedText';
 import { memo, useCallback } from 'react';
-
-/**
- * @typedef {Object} EpisodeListItemProps
- * @property {Object} episode - The episode data object
- * @property {Function} onDelete - Callback function when delete is pressed
- * @property {Function} onEdit - Callback function when edit is pressed
- * @property {Function} onToggleSelection - Callback function when selection is toggled
- * @property {boolean} isSelected - Whether the episode is currently selected
- */
 
 const EpisodeListItem = ({ 
     episode, 
@@ -25,7 +16,6 @@ const EpisodeListItem = ({
 }) => {
     const { isDark } = useTheme();
     
-    // Add memoization to prevent unnecessary re-renders
     const handleMoveUp = useCallback(() => {
         onMoveUp(episode);
     }, [episode, onMoveUp]);
@@ -35,37 +25,39 @@ const EpisodeListItem = ({
     }, [episode, onMoveDown]);
 
     return (
-        <View className={`flex-row justify-between items-center ${isDark ? 'bg-surface-dark' : 'bg-surface-light'} rounded-lg mb-2 p-3`}>
+        // Changed background color from bg-neutral-100 to bg-gray-200 to make it darker than the page background (#f3f4f6)
+        <View className={`flex-row justify-between items-center ${isDark ? 'bg-surface-dark' : 'bg-gray-200'} rounded-lg mb-2 p-3`}>
             <View className="flex-row gap-2 items-center">
                 <TouchableOpacity
                     onPress={() => onDelete(episode)}
                     className="bg-red-600 px-3 py-1 rounded">
-                    <ThemedText>מחק</ThemedText>
+                    <ThemedText className="text-white">מחק</ThemedText>
                 </TouchableOpacity>
                 <TouchableOpacity
                     onPress={() => onEdit(episode)}
                     className="bg-blue-600 px-3 py-1 rounded">
-                    <ThemedText>ערוך</ThemedText>
+                    <ThemedText className="text-white">ערוך</ThemedText>
                 </TouchableOpacity>
                 <View className="flex-row gap-1">
+                    {/* Reorder Buttons: Updated to high-contrast slate-700 on gray-300 in light mode */}
                     <TouchableOpacity
                         onPress={handleMoveUp}
                         disabled={isReordering}
-                        className={`bg-gray-600 p-1 rounded ${isReordering ? 'opacity-50' : ''}`}>
+                        className={`${isDark ? 'bg-neutral-800' : 'bg-gray-300'} p-1 rounded ${isReordering ? 'opacity-50' : ''}`}>
                         <Ionicons 
                             name="chevron-up" 
                             size={20} 
-                            color={isDark ? "#ffffff" : "#000000"}
+                            color={isDark ? "#ffffff" : "#1e293b"} 
                         />
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={handleMoveDown}
                         disabled={isReordering}
-                        className={`bg-gray-600 p-1 rounded ${isReordering ? 'opacity-50' : ''}`}>
+                        className={`${isDark ? 'bg-neutral-800' : 'bg-gray-300'} p-1 rounded ${isReordering ? 'opacity-50' : ''}`}>
                         <Ionicons 
                             name="chevron-down" 
                             size={20} 
-                            color={isDark ? "#ffffff" : "#000000"}
+                            color={isDark ? "#ffffff" : "#1e293b"} 
                         />
                     </TouchableOpacity>
                 </View>
@@ -80,7 +72,7 @@ const EpisodeListItem = ({
                     <Ionicons
                         name={isSelected ? "checkbox-outline" : "square-outline"}
                         size={24}
-                        color={isDark ? "#ffffff" : "#000000"}
+                        color={isDark ? "#ffffff" : "#334155"}
                     />
                 </Pressable>
             </View>
@@ -88,4 +80,4 @@ const EpisodeListItem = ({
     );
 };
 
-export default memo(EpisodeListItem); // Add memo to prevent unnecessary re-renders
+export default memo(EpisodeListItem);
