@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { View } from 'react-native';
-import { DragDropContext, Droppable } from 'react-beautiful-dnd';
-import DraggableFlatList from 'react-native-draggable-flatlist';
+import React, { useState } from 'react';
+import { View, StyleSheet } from 'react-native';
+import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist';
 import EpisodeListItem from './EpisodeListItem';
 import Loader from './Loader';
 import { useTheme } from '../context/ThemeContext';
@@ -11,122 +10,90 @@ export default function DraggableEpisodeList({
     episodes, 
     onReorder, 
     category, 
-    book 
+    book,
+    onDelete,
+    onEdit,
+    onToggleSelection,
+    selectedEpisodes = []
 }) {
     const { isDark } = useTheme();
-    const [isDragging, setIsDragging] = useState(false);
     const [isReordering, setIsReordering] = useState(false);
 
-    const handleDragEnd = async (result) => {
-        setIsDragging(false);
-        if (!result.destination) return;
-
-        const sourceIndex = result.source.index;
-        const destIndex = result.destination.index;
-        
-        if (sourceIndex === destIndex) return;
-
+    const handleDragEnd = async ({ data }) => {
         try {
             setIsReordering(true);
             
-            const updatedEpisodes = Array.from(episodes);
-            const [reorderedItem] = updatedEpisodes.splice(sourceIndex, 1);
-            updatedEpisodes.splice(destIndex, 0, reorderedItem);
+            // Re-map the episodeOrder indexes to match their new positions in the list
+            const updatedEpisodes = data.map((item, index) => ({
+                ...item,
+                episodeOrder: index + 1
+            }));
 
-            // Update UI immediately
+            // Immediately update parent state to make UI movement smooth
             onReorder(updatedEpisodes);
 
-            // Calculate new order using one of the approaches above
-            const newOrder = calculateNewOrder(updatedEpisodes, destIndex);
-            
-            // Update the reordered item's episodeOrder
-            reorderedItem.episodeOrder = newOrder;
-            
-            // Batch update backend with all reordered episodes
+            // Update database
             await reorderEpisodes(updatedEpisodes);
         } catch (error) {
             console.error('Error reordering:', error);
-            // Only show error in console, don't alert
         } finally {
             setIsReordering(false);
         }
     };
 
     const renderItem = ({ item, drag, isActive }) => {
+        const episodeId = item.$id || item.id;
+        const isSelected = selectedEpisodes.some(selected => (selected.$id || selected.id) === episodeId);
+
         return (
-            <View 
-                style={{ 
-                    opacity: isActive ? 0.5 : 1,
-                    transform: [{ scale: isActive ? 1.05 : 1 }]
-                }}
-            >
-                <EpisodeListItem
-                    episode={item}
-                    onDelete={onDelete}
-                    onEdit={onEdit}
-                    onToggleSelection={onToggleSelection}
-                    isSelected={selectedEpisodes.some(selected => selected.$id === item.$id)}
-                    onLongPress={drag}
-                    category={category}
-                    book={book}
-                />
-            </View>
+            <ScaleDecorator>
+                <View style={{ opacity: isActive ? 0.8 : 1 }}>
+                    <EpisodeListItem
+                        episode={item}
+                        onDelete={onDelete}
+                        onEdit={onEdit}
+                        onToggleSelection={onToggleSelection}
+                        isSelected={isSelected}
+                        onMoveUp={null} // Drag handle overrides manual stepping
+                        onMoveDown={null}
+                        isReordering={isReordering}
+                    />
+                </View>
+            </ScaleDecorator>
         );
     };
 
     return (
-        <div className="w-full">
+        <View style={styles.container}>
             {isReordering && (
-                <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
+                <View style={styles.loaderContainer}>
                     <Loader />
-                </div>
+                </View>
             )}
-            <DragDropContext 
-                onDragEnd={handleDragEnd} 
-                onDragStart={() => setIsDragging(true)}
-            >
-                <Droppable droppableId="episodes">
-                    {(provided) => (
-                        <div
-                            {...provided.droppableProps}
-                            ref={provided.innerRef}
-                            className={`space-y-2 ${isDragging ? 'opacity-50' : ''}`}
-                        >
-                            {episodes.map((episode, index) => (
-                                <EpisodeListItem
-                                    key={episode.$id}
-                                    episode={episode}
-                                    index={index}
-                                    category={category}
-                                    book={book}
-                                />
-                            ))}
-                            {provided.placeholder}
-                        </div>
-                    )}
-                </Droppable>
-            </DragDropContext>
-        </div>
+            <DraggableFlatList
+                data={episodes}
+                onDragEnd={handleDragEnd}
+                keyExtractor={(item) => item.$id || item.id}
+                renderItem={renderItem}
+                containerStyle={styles.listContainer}
+            />
+        </View>
     );
-};
-
-function calculateNewOrder(episodes, destIndex) {
-    const INCREMENT = 1000; // Large increment to allow for future insertions
-    
-    if (episodes.length === 0) return INCREMENT;
-    
-    if (destIndex === 0) {
-        // If moved to start
-        return Math.floor(episodes[0].episodeOrder - INCREMENT);
-    } 
-    
-    if (destIndex === episodes.length - 1) {
-        // If moved to end
-        return Math.floor(episodes[destIndex - 1].episodeOrder + INCREMENT);
-    }
-    
-    // If moved between items
-    const prevOrder = episodes[destIndex - 1].episodeOrder;
-    const nextOrder = episodes[destIndex].episodeOrder;
-    return Math.floor(prevOrder + (nextOrder - prevOrder) / 2);
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        position: 'relative',
+    },
+    loaderContainer: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 10,
+    },
+    listContainer: {
+        flexGrow: 1,
+    }
+});

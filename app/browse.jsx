@@ -1,7 +1,7 @@
 import { View, Text, ScrollView, Pressable, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useGlobalContext } from '../context/GlobalProvider';
 import { 
@@ -10,7 +10,6 @@ import {
     updateFile, 
     deleteMultipleFiles,
     reorderEpisodes,
-    updateAllDocumentsOrder,
     reuploadAllProblematicFiles
 } from '../lib/firebase';
 import CustomButton from '../components/CustomButton';
@@ -48,6 +47,9 @@ const Browse = () => {
         fetchBooks();
     }, []);
 
+    // Helper to get consistent ID regardless of schema
+    const getEpisodeId = (episode) => episode?.$id || episode?.id;
+
     // Data fetching
     const fetchBooks = async () => {
         try {
@@ -82,12 +84,13 @@ const Browse = () => {
 
     // Event handlers
     const handleDelete = async (episode) => {
+        const episodeId = getEpisodeId(episode);
         customAlert(
             'אישור מחיקה',
             'האם אתה בטוח שברצונך למחוק פרק זה?',
             async () => {
                 try {
-                    await deleteFile(episode.$id);
+                    await deleteFile(episodeId);
                     await fetchBooks();
                     customAlert('הצלחה', 'הפרק נמחק בהצלחה');
                 } catch (error) {
@@ -105,8 +108,9 @@ const Browse = () => {
     };
 
     const handleEdit = async (formData) => {
+        const episodeId = getEpisodeId(editingEpisode);
         try {
-            await updateFile(editingEpisode.$id, formData);
+            await updateFile(episodeId, formData);
             await fetchBooks();
             customAlert('הצלחה', 'הפרק עודכן בהצלחה');
         } catch (error) {
@@ -118,76 +122,77 @@ const Browse = () => {
         }
     };
 
-const handleReorder = async (episode, direction) => {
-    // Prevent multiple simultaneous reorders
-    if (reorderingId) {
-        return;
-    }
+    const handleReorder = async (episode, direction) => {
+        const episodeId = getEpisodeId(episode);
+        if (!episodeId || reorderingId) return;
 
-    try {
-        // Mark this episode as reordering
-        setReorderingId(episode.$id);
+        const currentCategory = books[episode.category];
+        if (!currentCategory) return;
 
-        // Always work with the most current state using functional update
-        setBooks(prevBooks => {
-            const bookEpisodes = Object.values(prevBooks[episode.category][episode.book]);
-            const sortedEpisodes = bookEpisodes.sort((a, b) => Number(a.episodeOrder) - Number(b.episodeOrder));
-            const currentIndex = sortedEpisodes.findIndex(ep => ep.$id === episode.$id);
-            
-            // Calculate target index
-            const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-            
-            // Check if move is possible
-            if (targetIndex < 0 || targetIndex >= sortedEpisodes.length) {
-                setReorderingId(null);
-                return prevBooks;
+        const currentBookEpisodes = currentCategory[episode.book];
+        if (!currentBookEpisodes) return;
+
+        // Ensure we are working with an array
+        const bookEpisodes = Array.isArray(currentBookEpisodes) 
+            ? [...currentBookEpisodes] 
+            : Object.values(currentBookEpisodes);
+
+        // Sort to verify current order
+        const sortedEpisodes = bookEpisodes.sort((a, b) => Number(a.episodeOrder) - Number(b.episodeOrder));
+        const currentIndex = sortedEpisodes.findIndex(ep => getEpisodeId(ep) === episodeId);
+        
+        if (currentIndex === -1) return;
+        
+        const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+        
+        // Boundaries check
+        if (targetIndex < 0 || targetIndex >= sortedEpisodes.length) {
+            return;
+        }
+
+        setReorderingId(episodeId);
+
+        // Create shallow copy and perform the swap
+        const updatedEpisodes = [...sortedEpisodes];
+        const temp = updatedEpisodes[currentIndex];
+        updatedEpisodes[currentIndex] = updatedEpisodes[targetIndex];
+        updatedEpisodes[targetIndex] = temp;
+
+        // Map and update the internal order values explicitly so the database gets updated index fields
+        const finalEpisodesWithUpdatedOrder = updatedEpisodes.map((ep, idx) => ({
+            ...ep,
+            episodeOrder: idx + 1
+        }));
+
+        // 1. Optimistically update local state for UI responsiveness
+        setBooks(prevBooks => ({
+            ...prevBooks,
+            [episode.category]: {
+                ...prevBooks[episode.category],
+                [episode.book]: finalEpisodesWithUpdatedOrder
             }
+        }));
 
-            // Perform simple array swap
-            const updatedEpisodes = [...sortedEpisodes];
-            [updatedEpisodes[currentIndex], updatedEpisodes[targetIndex]] = [
-                updatedEpisodes[targetIndex],
-                updatedEpisodes[currentIndex]
-            ];
+        // 2. Perform backend update outside of the state updater flow
+        try {
+            await reorderEpisodes(finalEpisodesWithUpdatedOrder);
+        } catch (error) {
+            console.error('Reorder error:', error);
+            // Revert state by fetching clean data from server if update fails
+            await fetchBooks();
+        } finally {
+            setReorderingId(null);
+        }
+    };
 
-            // Trigger backend update after state is updated
-            Promise.resolve().then(() => {
-                reorderEpisodes(updatedEpisodes)
-                    .catch(error => {
-                        console.error('Reorder error:', error);
-                        // Refresh the list only if there's an error
-                        fetchBooks();
-                    })
-                    .finally(() => {
-                        // Clear reordering state after operation completes
-                        setReorderingId(null);
-                    });
-            });
-
-            // Return updated books state
-            return {
-                ...prevBooks,
-                [episode.category]: {
-                    ...prevBooks[episode.category],
-                    [episode.book]: updatedEpisodes
-                }
-            };
-        });
-    } catch (error) {
-        console.error('Reorder error:', error);
-        setReorderingId(null);
-        // Refresh the list only if there's an error
-        await fetchBooks();
-    }
-};
-
-const handleMoveUp = (episode) => handleReorder(episode, 'up');
-const handleMoveDown = (episode) => handleReorder(episode, 'down');
+    const handleMoveUp = (episode) => handleReorder(episode, 'up');
+    const handleMoveDown = (episode) => handleReorder(episode, 'down');
 
     const toggleEpisodeSelection = (episode) => {
+        const episodeId = getEpisodeId(episode);
         setSelectedEpisodes(prev => 
-            prev.some(selected => selected.$id === episode.$id)
-                ? prev.filter(selected => selected.$id !== episode.$id)
+            prev.some(selected => getEpisodeId(selected) === episodeId)
+                ? prev.filter(selected => getEpisodeId(selected) !== episodeId)
                 : [...prev, episode]
         );
     };
@@ -235,58 +240,41 @@ const handleMoveDown = (episode) => handleReorder(episode, 'down');
             [bookName]: !prev[bookName]
         }));
 
-        // If selecting the book, add all episodes to selectedEpisodes
-        if (!bookSelection[bookName]) {
+        const isSelecting = !bookSelection[bookName];
+
+        if (isSelecting) {
             setSelectedEpisodes(prev => {
                 const newEpisodes = episodes.filter(episode =>
-                    !prev.some(selected => selected.$id === episode.$id)
+                    !prev.some(selected => getEpisodeId(selected) === getEpisodeId(episode))
                 );
                 return [...prev, ...newEpisodes];
             });
-        }
-        // If unselecting the book, remove all episodes from selectedEpisodes
-        else {
+        } else {
             setSelectedEpisodes(prev =>
-                prev.filter(episode => !episodes.some(e => e.$id === episode.$id))
+                prev.filter(episode => !episodes.some(e => getEpisodeId(e) === getEpisodeId(episode)))
             );
-        }
-    };
-
-    const handleUpdateAllOrders = async () => {
-        try {
-            await withLoading(async () => {
-                // Use the new reupload function instead
-                const result = await reuploadAllProblematicFiles();
-                customAlert(
-                    'הצלחה',
-                    `הועלו מחדש ${result.updated} מתוך ${result.total} קבצים. ${result.failed} נכשלו.`
-                );
-                await fetchBooks(); // Refresh the list
-            });
-        } catch (error) {
-            handleError(error, {
-                title: 'שגיאה בעדכון קבצים',
-                fallbackMessage: 'לא ניתן לעדכן את הקבצים'
-            });
         }
     };
 
     // Render methods
     const renderEpisodeList = (episodes) => (
         <View>
-            {episodes.map(episode => (
-                <EpisodeListItem
-                    key={episode.id}
-                    episode={episode}
-                    onDelete={handleDelete}
-                    onEdit={setEditingEpisode}
-                    onToggleSelection={toggleEpisodeSelection}
-                    isSelected={selectedEpisodes.some(selected => selected.id === episode.id)}
-                    onMoveUp={handleMoveUp}
-                    onMoveDown={handleMoveDown}
-                    isReordering={reorderingId === episode.id}
-                />
-            ))}
+            {episodes.map(episode => {
+                const episodeId = getEpisodeId(episode);
+                return (
+                    <EpisodeListItem
+                        key={episodeId}
+                        episode={episode}
+                        onDelete={handleDelete}
+                        onEdit={setEditingEpisode}
+                        onToggleSelection={toggleEpisodeSelection}
+                        isSelected={selectedEpisodes.some(selected => getEpisodeId(selected) === episodeId)}
+                        onMoveUp={handleMoveUp}
+                        onMoveDown={handleMoveDown}
+                        isReordering={reorderingId === episodeId}
+                    />
+                );
+            })}
         </View>
     );
 
@@ -344,18 +332,11 @@ const handleMoveDown = (episode) => handleReorder(episode, 'down');
                     <View className="flex-row justify-end p-4">
                         <CustomButton
                             title={`מחק ${selectedEpisodes.length} פרקים`}
-                            handlePress={handleMultipleDelete} // Changed from onPress to handlePress
-                            containerStyles="bg-red-600" // Changed from style to containerStyles
+                            handlePress={handleMultipleDelete}
+                            containerStyles="bg-red-600"
                         />
                     </View>
                 )}
-                {selectedEpisodes.length === 0 /**&& (
-                    <CustomButton
-                        title="עדכן סדר קבצים"
-                        handlePress={handleUpdateAllOrders}
-                        containerStyles="bg-primary"
-                    />
-                )**/}
             </ScrollView>
             <EditModal
                 isVisible={!!editingEpisode}
