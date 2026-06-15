@@ -15,7 +15,7 @@ export const useErrorHandler = () => {
       onClose = null
     } = options;
 
-    // Handle Appwrite specific errors
+    // Handle HTTP status code errors (formerly Appwrite errors)
     if (error?.code) {
       switch (error.code) {
         case 401:

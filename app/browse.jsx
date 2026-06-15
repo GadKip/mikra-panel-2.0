@@ -38,7 +38,7 @@ const Browse = () => {
     const { withLoading, isLoading } = useLoadingState();
     const { getResponsiveValue } = useResponsive();
     const handleError = useErrorHandler();
-    const { client } = useGlobalContext();
+    const { user, setUser, loggedIn } = useGlobalContext();
     const customAlert = useCustomAlert();
     const router = useRouter();
     const { isDark } = useTheme();

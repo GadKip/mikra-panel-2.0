@@ -50,7 +50,7 @@ export const GlobalProvider = ({ children }) => {
     }, []);
 
     // For backward compatibility, client is null with Firebase
-    const contextValue = { user, setUser, loggedIn, setLoggedIn, loading, setLoading, client: null };
+    const contextValue = { user, setUser, loggedIn, setLoggedIn, loading, setLoading };
 
     return (
         <GlobalContext.Provider value={contextValue}>

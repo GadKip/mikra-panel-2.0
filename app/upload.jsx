@@ -17,7 +17,7 @@ import { useTheme } from '../context/ThemeContext';
 import ThemedText from '../components/ThemedText';
 
 const Upload = () => {
-    const { user, setUser, loggedIn, client } = useGlobalContext();
+    const { user, setUser, loggedIn } = useGlobalContext();
     const { withLoading, isLoading } = useLoadingState();
     const [form, setForm] = useState({ category: '', book: '', episode: '' });
     const [books, setBooks] = useState([]);
